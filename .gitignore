@@ -1,0 +1,13 @@
+**/build
+**/Output
+
+**/__pycache__
+**/*.bin
+**/*.jflash
+**/*.lock
+
+*.html
+.vscode
+node_modules
+package.json
+package-lock.json
