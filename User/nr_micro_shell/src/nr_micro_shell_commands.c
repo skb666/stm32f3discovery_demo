@@ -30,10 +30,14 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-
-#include "nr_micro_shell.h"
 #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "main.h"
+#include "nr_micro_shell.h"
+#include "param.h"
 
 /**
  * @brief ls command
@@ -71,6 +75,158 @@ void shell_test_cmd(char argc, char *argv) {
   }
 }
 
+static void led_control(void) {
+  SYS_PARAM *sys = sys_param_get();
+  LED_CTRL leds = (LED_CTRL)&sys->ctrl.leds;
+
+  if (leds->LD3) {
+    LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+  } else {
+    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+  }
+
+  if (leds->LD4) {
+    LL_GPIO_SetOutputPin(LD4_GPIO_Port, LD4_Pin);
+  } else {
+    LL_GPIO_ResetOutputPin(LD4_GPIO_Port, LD4_Pin);
+  }
+
+  if (leds->LD5) {
+    LL_GPIO_SetOutputPin(LD5_GPIO_Port, LD5_Pin);
+  } else {
+    LL_GPIO_ResetOutputPin(LD5_GPIO_Port, LD5_Pin);
+  }
+
+  if (leds->LD6) {
+    LL_GPIO_SetOutputPin(LD6_GPIO_Port, LD6_Pin);
+  } else {
+    LL_GPIO_ResetOutputPin(LD6_GPIO_Port, LD6_Pin);
+  }
+
+  if (leds->LD7) {
+    LL_GPIO_SetOutputPin(LD7_GPIO_Port, LD7_Pin);
+  } else {
+    LL_GPIO_ResetOutputPin(LD7_GPIO_Port, LD7_Pin);
+  }
+
+  if (leds->LD8) {
+    LL_GPIO_SetOutputPin(LD8_GPIO_Port, LD8_Pin);
+  } else {
+    LL_GPIO_ResetOutputPin(LD8_GPIO_Port, LD8_Pin);
+  }
+
+  if (leds->LD9) {
+    LL_GPIO_SetOutputPin(LD9_GPIO_Port, LD9_Pin);
+  } else {
+    LL_GPIO_ResetOutputPin(LD9_GPIO_Port, LD9_Pin);
+  }
+
+  if (leds->LD10) {
+    LL_GPIO_SetOutputPin(LD10_GPIO_Port, LD10_Pin);
+  } else {
+    LL_GPIO_ResetOutputPin(LD10_GPIO_Port, LD10_Pin);
+  }
+}
+
+/**
+ * @brief led command
+ */
+void shell_led_cmd(char argc, char *argv) {
+  SYS_PARAM *sys = sys_param_get();
+  LED_CTRL leds = (LED_CTRL)&sys->ctrl.leds;
+  uint8_t sw = 0;
+
+  if (argc > 1) {
+    if (!strcmp("all", &argv[argv[1]])) {
+      if (argc <= 2) {
+        shell_printf("led need more arguments!\r\n");
+      }
+      if (sscanf(&argv[argv[2]], "%hhx", &sys->ctrl.leds) > 0) {
+        shell_printf("led control: 0x%02x\r\n", sys->ctrl.leds);
+        led_control();
+      }
+    } else if (!strcmp("ld3", &argv[argv[1]])) {
+      if (argc <= 2) {
+        shell_printf("led need more arguments!\r\n");
+      }
+      if (sscanf(&argv[argv[2]], "%hhu", &sw) > 0 && sw < 2) {
+        shell_printf("LD3 control: %s\r\n", sw ? "on" : "off");
+        leds->LD3 = sw;
+        led_control();
+      }
+    } else if (!strcmp("ld4", &argv[argv[1]])) {
+      if (argc <= 2) {
+        shell_printf("led need more arguments!\r\n");
+      }
+      if (sscanf(&argv[argv[2]], "%hhu", &sw) > 0 && sw < 2) {
+        shell_printf("LD4 control: %s\r\n", sw ? "on" : "off");
+        leds->LD4 = sw;
+        led_control();
+      }
+    } else if (!strcmp("ld5", &argv[argv[1]])) {
+      if (argc <= 2) {
+        shell_printf("led need more arguments!\r\n");
+      }
+      if (sscanf(&argv[argv[2]], "%hhu", &sw) > 0 && sw < 2) {
+        shell_printf("LD5 control: %s\r\n", sw ? "on" : "off");
+        leds->LD5 = sw;
+        led_control();
+      }
+    } else if (!strcmp("ld6", &argv[argv[1]])) {
+      if (argc <= 2) {
+        shell_printf("led need more arguments!\r\n");
+      }
+      if (sscanf(&argv[argv[2]], "%hhu", &sw) > 0 && sw < 2) {
+        shell_printf("LD6 control: %s\r\n", sw ? "on" : "off");
+        leds->LD6 = sw;
+        led_control();
+      }
+    } else if (!strcmp("ld7", &argv[argv[1]])) {
+      if (argc <= 2) {
+        shell_printf("led need more arguments!\r\n");
+      }
+      if (sscanf(&argv[argv[2]], "%hhu", &sw) > 0 && sw < 2) {
+        shell_printf("LD7 control: %s\r\n", sw ? "on" : "off");
+        leds->LD7 = sw;
+        led_control();
+      }
+    } else if (!strcmp("ld8", &argv[argv[1]])) {
+      if (argc <= 2) {
+        shell_printf("led need more arguments!\r\n");
+      }
+      if (sscanf(&argv[argv[2]], "%hhu", &sw) > 0 && sw < 2) {
+        shell_printf("LD8 control: %s\r\n", sw ? "on" : "off");
+        leds->LD8 = sw;
+        led_control();
+      }
+    } else if (!strcmp("ld9", &argv[argv[1]])) {
+      if (argc <= 2) {
+        shell_printf("led need more arguments!\r\n");
+      }
+      if (sscanf(&argv[argv[2]], "%hhu", &sw) > 0 && sw < 2) {
+        shell_printf("LD9 control: %s\r\n", sw ? "on" : "off");
+        leds->LD9 = sw;
+        led_control();
+      }
+    } else if (!strcmp("ld10", &argv[argv[1]])) {
+      if (argc <= 2) {
+        shell_printf("led need more arguments!\r\n");
+      }
+      if (sscanf(&argv[argv[2]], "%hhu", &sw) > 0 && sw < 2) {
+        shell_printf("LD10 control: %s\r\n", sw ? "on" : "off");
+        leds->LD10 = sw;
+        led_control();
+      }
+    } else if (!strcmp("-h", &argv[argv[1]])) {
+      shell_printf("useage: led [options]\r\n");
+      shell_printf("options: \r\n");
+      shell_printf("\t -h \t: show help\r\n");
+    }
+  } else {
+    shell_printf("led need more arguments!\r\n");
+  }
+}
+
 #ifdef NR_SHELL_USING_EXPORT_CMD
 NR_SHELL_CMD_EXPORT(ls, shell_ls_cmd);
 NR_SHELL_CMD_EXPORT(test, shell_test_cmd);
@@ -78,6 +234,7 @@ NR_SHELL_CMD_EXPORT(test, shell_test_cmd);
 const static_cmd_st static_cmd[] = {
     {"ls", shell_ls_cmd},
     {"test", shell_test_cmd},
+    {"led", shell_led_cmd},
     {"\0", NULL},
 };
 #endif

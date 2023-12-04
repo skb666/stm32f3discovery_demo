@@ -31,7 +31,7 @@
       Name="Common"
       Target="STM32F303VCTx"
       arm_architecture="v7EM"
-      arm_compiler_variant="gcc"
+      arm_compiler_variant="SEGGER"
       arm_core_type="Cortex-M4"
       arm_endian="Little"
       arm_fp_abi="Hard"
@@ -51,6 +51,7 @@
       debug_stack_pointer_start="__stack_end__"
       debug_start_from_entry_point_symbol="Yes"
       gcc_entry_point="Reset_Handler"
+      gdb_server_command_line="C:\ST\STM32CubeIDE_1.14.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.win32_2.1.100.202310302101\tools\bin\ST-LINK_gdbserver.exe -p 61234 -l 1 -d -s -cp C:\ST\STM32CubeIDE_1.14.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.win32_2.1.100.202311100844\tools\bin -m 0 -k"
       link_linker_script_file="$(ProjectDir)/STM32F3xx_Flash_CCM.icf"
       linker_memory_map_file="$(ProjectDir)/STM32F303VCTx_MemoryMap.xml"
       linker_output_format="bin"
@@ -66,6 +67,7 @@
       <file file_name="../Core/Src/dma.c" />
       <file file_name="../Core/Src/gpio.c" />
       <file file_name="../Core/Src/i2c.c" />
+      <file file_name="../Core/Src/iwdg.c" />
       <file file_name="../Core/Src/main.c" />
       <file file_name="../Core/Src/spi.c" />
       <file file_name="../Core/Src/stm32f3xx_hal_msp.c" />

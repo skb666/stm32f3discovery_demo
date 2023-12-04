@@ -16,7 +16,7 @@ typedef struct {
   uint8_t LD8 : 1;
   uint8_t LD9 : 1;
   uint8_t LD10 : 1;
-} LED_CTRL;
+} *LED_CTRL;
 
 typedef struct {
   uint8_t leds;

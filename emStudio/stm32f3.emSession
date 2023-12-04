@@ -25,6 +25,7 @@
   <ProjectSessionItem path="stm32f3;stm32f3;USB_DEVICE"/>
   <ProjectSessionItem path="stm32f3;stm32f3;USB_DEVICE;App"/>
   <ProjectSessionItem path="stm32f3;stm32f3;User"/>
+  <ProjectSessionItem path="stm32f3;stm32f3;User;nr_micro_shell"/>
   <ProjectSessionItem path="stm32f3;stm32f3;User;task_event"/>
   <ProjectSessionItem path="stm32f3;stm32f3;User;task_event;app"/>
   <ProjectSessionItem path="stm32f3;stm32f3;User;task_event;core"/>
@@ -63,12 +64,12 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="90" useTextEdit="1" path="../Core/Src/main.c" left="0" top="49" codecName="UTF-8"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="11" y="23" useTextEdit="1" path="../User/task_event/app/src/task_main.c" left="0" selected="1" top="0" codecName="UTF-8"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="0" useTextEdit="1" path="../User/other/src/param.c" left="0" top="0" codecName="UTF-8"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="11" y="10" useTextEdit="1" path="../User/task_event/core/src/task.c" left="0" top="0" codecName="UTF-8"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="19" y="44" useTextEdit="1" path="../User/task_event/user/src/task_user.c" left="0" top="17" codecName="UTF-8"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="32" useTextEdit="1" openedFrom="D:/work/stm32f3/User/task_event/user/src/task_user.c" path="../User/task_event/user/inc/task_user.h" left="0" top="5" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="100" useTextEdit="1" path="../Core/Src/main.c" left="0" top="72" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="40" y="144" useTextEdit="1" path="../User/nr_micro_shell/src/nr_micro_shell_commands.c" left="0" selected="1" top="205" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="25" y="131" useTextEdit="1" path="../User/nr_micro_shell/src/nr_micro_shell.c" left="0" top="114" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="23" y="43" useTextEdit="1" openedFrom="D:/work/stm32f3/User/nr_micro_shell/src/nr_micro_shell.c" path="../User/nr_micro_shell/inc/nr_micro_shell.h" left="0" top="61" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="0" useTextEdit="1" openedFrom="D:/work/stm32f3/User/nr_micro_shell/inc/nr_micro_shell_config.h" path="../USB_DEVICE/App/usbd_cdc_if.h" left="0" top="0" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="41" y="143" useTextEdit="1" openedFrom="D:/work/stm32f3/User/nr_micro_shell/src/nr_micro_shell_commands.c" path="../User/nr_micro_shell/inc/nr_micro_shell_config.h" left="0" top="117" codecName="UTF-8"/>
  </Files>
- <EMStudioWindow activeProject="stm32f3" fileDialogDefaultFilter="*" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="D:/work/stm32f3/User/other/src" debugSearchPath="" autoConnectCapabilities="1343"/>
+ <EMStudioWindow activeProject="stm32f3" fileDialogDefaultFilter="*" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="D:/work/stm32f3/Core/Src" debugSearchPath="" autoConnectCapabilities="1343"/>
 </session>

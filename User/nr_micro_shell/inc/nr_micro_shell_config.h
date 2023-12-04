@@ -138,7 +138,7 @@ The end of line.
 #define NR_SHELL_SHOW_LOG
 
 // /* Use NR_SHELL_CMD_EXPORT() or not */
-// #define NR_SHELL_USING_EXPORT_CMD
+//#define NR_SHELL_USING_EXPORT_CMD
 #include "usbd_cdc_if.h"
 /* If you use RTOS, you may need to do some special processing for printf(). */
 #define shell_printf(fmt, args...) usb_printf(fmt, ##args);
