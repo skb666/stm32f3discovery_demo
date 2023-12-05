@@ -2,7 +2,6 @@
 
 #include "common.h"
 #include "main.h"
-#include "usbd_cdc_if.h"
 
 #define UART_TX_RING_SIZE 1280
 #define UART_RX_RING_SIZE 1280
@@ -43,34 +42,34 @@ static frame_parse_t rx_frame = {
 
 void uart_config(void) {
   /* USART_RX DMA */
-  LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_5,
-      LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_RECEIVE),
+  LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_3,
+      LL_USART_DMA_GetRegAddr(USART3, LL_USART_DMA_REG_DATA_RECEIVE),
       (uint32_t)uart_dmarx_buf,
-      LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_5));
-  LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, UART_DMARX_BUF_SIZE);
+      LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_3));
+  LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_3, UART_DMARX_BUF_SIZE);
 
   /* USART_TX DMA */
-  LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_4,
+  LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_2,
       (uint32_t)uart_dmatx_buf,
-      LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_TRANSMIT),
-      LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_4));
+      LL_USART_DMA_GetRegAddr(USART3, LL_USART_DMA_REG_DATA_TRANSMIT),
+      LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_2));
 
-  LL_DMA_ClearFlag_HT5(DMA1);
-  LL_DMA_ClearFlag_TC5(DMA1);
-  LL_DMA_ClearFlag_TE5(DMA1);
+  LL_DMA_ClearFlag_HT3(DMA1);
+  LL_DMA_ClearFlag_TC3(DMA1);
+  LL_DMA_ClearFlag_TE3(DMA1);
 
-  LL_DMA_ClearFlag_TC4(DMA1);
-  LL_DMA_ClearFlag_TE4(DMA1);
+  LL_DMA_ClearFlag_TC2(DMA1);
+  LL_DMA_ClearFlag_TE2(DMA1);
 
-  LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_5);
-  LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_5);
-  LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_4);
+  LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_3);
+  LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_3);
+  LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_2);
 
-  LL_USART_EnableDMAReq_RX(USART1);
-  LL_USART_EnableDMAReq_TX(USART1);
-  LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_5);
+  LL_USART_EnableDMAReq_RX(USART3);
+  LL_USART_EnableDMAReq_TX(USART3);
+  LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_3);
 
-  LL_USART_EnableIT_IDLE(USART1);
+  LL_USART_EnableIT_IDLE(USART3);
 }
 
 /**
@@ -78,7 +77,7 @@ void uart_config(void) {
  * @param
  * @retval
  */
-void uart_dmarx_done_isr(void) {
+void uart_dmarx_done_isr(void (*func)(uint8_t *, uint16_t)) {
   uint16_t recv_size;
 
   recv_size = UART_DMARX_BUF_SIZE - uart_dev.last_dmarx_size;
@@ -86,6 +85,10 @@ void uart_dmarx_done_isr(void) {
   disable_global_irq();
   ring_push_mult(&uart_rx_ring, &uart_dmarx_buf[uart_dev.last_dmarx_size], recv_size);
   enable_global_irq();
+
+  if (func) {
+    func(&uart_dmarx_buf[uart_dev.last_dmarx_size], recv_size);
+  }
 
   uart_dev.last_dmarx_size = 0;
 }
@@ -95,16 +98,20 @@ void uart_dmarx_done_isr(void) {
  * @param
  * @retval
  */
-void uart_dmarx_part_done_isr(void) {
+void uart_dmarx_part_done_isr(void (*func)(uint8_t *, uint16_t)) {
   uint16_t recv_total_size;
   uint16_t recv_size;
 
-  recv_total_size = UART_DMARX_BUF_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_5);
+  recv_total_size = UART_DMARX_BUF_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_3);
   recv_size = recv_total_size - uart_dev.last_dmarx_size;
 
   disable_global_irq();
   ring_push_mult(&uart_rx_ring, &uart_dmarx_buf[uart_dev.last_dmarx_size], recv_size);
   enable_global_irq();
+
+  if (func) {
+    func(&uart_dmarx_buf[uart_dev.last_dmarx_size], recv_size);
+  }
 
   uart_dev.last_dmarx_size = recv_total_size;
 }
@@ -144,9 +151,9 @@ void uart_tx_poll(void (*func)(uint8_t *, uint16_t)) {
 
   uart_dev.status = 1;
 
-  LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_4);
-  LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, size);
-  LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);
+  LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
+  LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, size);
+  LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
 }
 
 uint16_t uart_read(uint8_t *buf, uint16_t size) {
@@ -205,7 +212,7 @@ int8_t frame_parse_register(uint8_t index, void (*func)(frame_parse_t *)) {
   }
 }
 
-void uart_frame_parse(void (*func)(uint8_t *, uint16_t)) {
+void uart_frame_parse(void) {
   uint16_t size = 0;
   uint8_t rx;
 
@@ -213,9 +220,6 @@ void uart_frame_parse(void (*func)(uint8_t *, uint16_t)) {
     case PARSE_STAT_HEAD1: {
       size = uart_read(&rx, 1);
       if (size) {
-        if (func) {
-          func(&rx, 1);
-        }
         if (rx == FRAME_HEAD1) {
           rx_frame.status = PARSE_STAT_HEAD2;
         }
@@ -224,9 +228,6 @@ void uart_frame_parse(void (*func)(uint8_t *, uint16_t)) {
     case PARSE_STAT_HEAD2: {
       size = uart_read(&rx, 1);
       if (size) {
-        if (func) {
-          func(&rx, 1);
-        }
         if (rx == FRAME_HEAD2) {
           rx_frame.status = PARSE_STAT_ID;
         } else {
@@ -237,9 +238,6 @@ void uart_frame_parse(void (*func)(uint8_t *, uint16_t)) {
     case PARSE_STAT_ID: {
       size = uart_read(&rx_frame.id, 1);
       if (size) {
-        if (func) {
-          func(&rx_frame.id, 1);
-        }
         if (rx_frame.id == 0xff) {
           rx_frame.byte_order = 1;
           rx_frame.status = PARSE_STAT_HEAD1;
@@ -257,9 +255,6 @@ void uart_frame_parse(void (*func)(uint8_t *, uint16_t)) {
     case PARSE_STAT_LENGTH: {
       size = uart_read((uint8_t *)&rx_frame.length + rx_frame.recv_size, sizeof(rx_frame.length) - rx_frame.recv_size);
       if (size) {
-        if (func) {
-          func((uint8_t *)&rx_frame.length + rx_frame.recv_size, size);
-        }
         rx_frame.recv_size += size;
       }
       if (rx_frame.recv_size >= sizeof(rx_frame.length)) {
@@ -280,9 +275,6 @@ void uart_frame_parse(void (*func)(uint8_t *, uint16_t)) {
     case PARSE_STAT_DATA: {
       size = uart_read(rx_frame.data + rx_frame.recv_size, rx_frame.length - rx_frame.recv_size);
       if (size) {
-        if (func) {
-          func(rx_frame.data + rx_frame.recv_size, size);
-        }
         rx_frame.recv_size += size;
       }
       if (rx_frame.recv_size >= rx_frame.length) {

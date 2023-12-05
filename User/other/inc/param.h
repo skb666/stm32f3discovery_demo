@@ -16,7 +16,13 @@ typedef struct {
 } SYS_CTRL;
 
 typedef struct {
-  uint8_t serial_to_usb;
+  uint8_t usart3_rx : 1;
+  uint8_t usart3_tx : 1;
+  uint8_t : 6;
+} USB_TX_FLAG;
+
+typedef struct {
+  USB_TX_FLAG usb_tx;
 } SYS_FLAG;
 
 typedef struct {

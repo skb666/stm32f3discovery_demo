@@ -5,10 +5,10 @@ extern void debug_print_init(void);
 extern void debug_print_handle(TASK *task);
 extern void key_scan_init(void);
 extern void key_scan_handle(TASK *task);
-extern void usart1_tx_init(void);
-extern void usart1_tx_handle(TASK *task);
-extern void usart1_rx_init(void);
-extern void usart1_rx_handle(TASK *task);
+extern void timer_1ms_init(void);
+extern void timer_1ms_handle(TASK *task);
+extern void main_loop_init(void);
+extern void main_loop_handle(TASK *task);
 
 static TASK s_task_list[] = {
     {
@@ -26,18 +26,18 @@ static TASK s_task_list[] = {
         .handle = key_scan_handle,
     },
     {
-        .id = TASK_ID_USART1_TX,
+        .id = TASK_ID_TIMER_1MS,
         .times = -1,
         .delay = 0,
-        .init = usart1_tx_init,
-        .handle = usart1_tx_handle,
+        .init = timer_1ms_init,
+        .handle = timer_1ms_handle,
     },
     {
-        .id = TASK_ID_USART1_RX,
+        .id = TASK_ID_MAIN_LOOP,
         .times = -1,
         .delay = 0,
-        .init = usart1_rx_init,
-        .handle = usart1_rx_handle,
+        .init = main_loop_init,
+        .handle = main_loop_handle,
     },
 };
 const static uint32_t s_task_list_size = ARRAY_SIZE(s_task_list);

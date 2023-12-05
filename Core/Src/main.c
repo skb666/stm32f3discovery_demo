@@ -140,7 +140,6 @@ int main(void)
     if (!usb_rx_get(&ch)) {
       shell(ch);
     }
-    usb_tx_trans();
 
     // 任务事件循环
     task_loop();

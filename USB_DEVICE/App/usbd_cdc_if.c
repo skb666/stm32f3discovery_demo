@@ -263,7 +263,9 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+  disable_global_irq();
   ring_push_mult(&usb_rx_buffer, Buf, *Len);
+  enable_global_irq();
   CDC_Transmit_FS(Buf, *Len);
 
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);

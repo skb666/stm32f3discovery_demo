@@ -8,9 +8,6 @@
 #include "timer.h"
 #include "usbd_cdc_if.h"
 
-#define SERIAL_TO_USB_TX 0x01
-#define SERIAL_TO_USB_RX 0x10
-
 typedef enum {
   FRAME_TYPE_DEBUG = 0,
   FRAME_TYPE_MAX,
@@ -37,10 +34,11 @@ static void task_event_process(TASK *task, void (*callback)(EVENT *)) {
   }
 }
 
-static void change_flag_serial_to_usb(void) {
+static void change_flag(void) {
   SYS_PARAM *sys = sys_param_get();
 
-  sys->flag.serial_to_usb = (sys->flag.serial_to_usb + 1) % 4;
+  sys->flag.usb_tx.usart3_rx = !sys->flag.usb_tx.usart3_rx;
+  sys->flag.usb_tx.usart3_tx = !sys->flag.usb_tx.usart3_tx;
 }
 
 /* 调试信息打印 */
@@ -55,7 +53,7 @@ static void debug_print_cb(EVENT *ev) {
   switch (ev->type) {
     case EVENT_TYPE_KEY_PRESS: {
       printf("[KEY]: PRESS\n");
-      change_flag_serial_to_usb();
+      change_flag();
     } break;
     case EVENT_TYPE_KEY_RELEASE: {
       printf("[KEY]: RELEASE\n");
@@ -125,53 +123,48 @@ void key_scan_handle(TASK *task) {
   task_event_process(task, key_scan_cb);
 }
 
-/* USART1 TX */
-void usart1_tx_init(void) {
-  task_event_subscribe(EVENT_TYPE_TICK_1MS, TASK_ID_USART1_TX);
+/* 1ms 周期任务 */
+void timer_1ms_init(void) {
+  task_event_subscribe(EVENT_TYPE_TICK_1MS, TASK_ID_TIMER_1MS);
 }
 
-static void usart1_tx_to_usb(uint8_t *buf, uint16_t len) {
+static void usart3_tx_to_usb(uint8_t *buf, uint16_t len) {
   SYS_PARAM *sys = sys_param_get();
 
-  if (sys->flag.serial_to_usb & SERIAL_TO_USB_TX) {
+  if (sys->flag.usb_tx.usart3_tx) {
     usb_puts(buf, len);
   }
 }
 
-static void usart1_tx_cb(EVENT *ev) {
+static void timer_1ms_cb(EVENT *ev) {
   switch (ev->type) {
     case EVENT_TYPE_TICK_1MS: {
-      uart_tx_poll(usart1_tx_to_usb);
+      // 串口发送
+      uart_tx_poll(usart3_tx_to_usb);
+      // usb cdc 发送
+      usb_tx_trans();
     } break;
     default: {
     } break;
   }
 }
 
-void usart1_tx_handle(TASK *task) {
-  task_event_process(task, usart1_tx_cb);
+void timer_1ms_handle(TASK *task) {
+  task_event_process(task, timer_1ms_cb);
 }
 
-/* USART1 RX */
+/* 循环任务 */
 static void print_frame(frame_parse_t *frame) {
   uart_write(frame->data, frame->length);
 }
 
-static void usart1_rx_to_usb(uint8_t *buf, uint16_t len) {
-  SYS_PARAM *sys = sys_param_get();
-
-  if (sys->flag.serial_to_usb & SERIAL_TO_USB_RX) {
-    usb_puts(buf, len);
-  }
-}
-
-void usart1_rx_init(void) {
+void main_loop_init(void) {
   frame_parse_register(FRAME_TYPE_DEBUG, print_frame);
 }
 
-void usart1_rx_handle(TASK *task) {
-  // USART1 帧解析
-  uart_frame_parse(usart1_rx_to_usb);
+void main_loop_handle(TASK *task) {
+  // USART3 帧解析
+  uart_frame_parse();
 
   task_update_times(task);
 }
