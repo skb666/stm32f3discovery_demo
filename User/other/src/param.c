@@ -7,7 +7,7 @@ SYS_PARAM *sys_param_get(void) {
 }
 
 void sys_param_init(void) {
-  sys_param.ctrl.leds = 0x00;
+  sys_param.ctrl.leds.value = 0;
   
   sys_param.flag.serial_to_usb = 0;
 }

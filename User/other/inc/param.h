@@ -8,18 +8,11 @@ extern "C" {
 #endif
 
 typedef struct {
-  uint8_t LD3 : 1;
-  uint8_t LD4 : 1;
-  uint8_t LD5 : 1;
-  uint8_t LD6 : 1;
-  uint8_t LD7 : 1;
-  uint8_t LD8 : 1;
-  uint8_t LD9 : 1;
-  uint8_t LD10 : 1;
-} *LED_CTRL;
+  uint16_t value;
+} LED_CTRL;
 
 typedef struct {
-  uint8_t leds;
+  LED_CTRL leds;
 } SYS_CTRL;
 
 typedef struct {
