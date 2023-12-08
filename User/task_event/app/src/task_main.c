@@ -3,10 +3,12 @@
 #include "device.h"
 #include "key.h"
 #include "main.h"
+#include "mycmd.h"
 #include "param.h"
 #include "task.h"
 #include "timer.h"
 #include "usbd_cdc_if.h"
+#include "xcmd.h"
 
 typedef enum {
   FRAME_TYPE_DEBUG = 0,
@@ -154,15 +156,30 @@ void timer_1ms_handle(TASK *task) {
 }
 
 /* 循环任务 */
+static int cmd_get_char(uint8_t *ch) {
+  return !usb_rx_get(ch);
+}
+
+static int cmd_put_char(uint8_t ch) {
+  usb_putchar(ch);
+  return 1;
+}
+
 static void print_frame(frame_parse_t *frame) {
   uart_write(frame->data, frame->length);
 }
 
 void main_loop_init(void) {
+  xcmd_init(cmd_get_char, cmd_put_char);
+  mycmd_init();
+
   frame_parse_register(FRAME_TYPE_DEBUG, print_frame);
 }
 
 void main_loop_handle(TASK *task) {
+  // USB CDC Shell
+  xcmd_task();
+
   // USART3 帧解析
   uart_frame_parse();
 
