@@ -266,7 +266,6 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   disable_global_irq();
   ring_push_mult(&usb_rx_buffer, Buf, *Len);
   enable_global_irq();
-  CDC_Transmit_FS(Buf, *Len);
 
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
@@ -333,6 +332,11 @@ void usb_putchar(const char ch)
 int8_t usb_rx_get(uint8_t *ch)
 {
   int8_t res = 0;
+
+  if (ring_is_empty(&usb_rx_buffer))
+  {
+    return -1;
+  }
 
   disable_global_irq();
   res = ring_pop(&usb_rx_buffer, ch);

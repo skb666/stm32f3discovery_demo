@@ -29,10 +29,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "nr_micro_shell.h"
+#include "usbd_cdc_if.h"
 #include "task.h"
 #include "device.h"
 #include "param.h"
+#include "xcmd.h"
+#include "mycmd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -82,6 +84,18 @@ void USB_Reset(void)
   LL_mDelay(10);
   LL_GPIO_SetOutputPin(DP_GPIO_Port, DP_Pin);
 }
+
+int cmd_get_char(uint8_t *ch)
+{
+    return !usb_rx_get(ch);
+}
+
+int cmd_put_char(uint8_t ch)
+{
+    usb_putchar(ch);
+
+    return 1;
+}
 /* USER CODE END 0 */
 
 /**
@@ -127,7 +141,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
   uart_config();
   LL_mDelay(800);
-  shell_init();
+  xcmd_init(cmd_get_char, cmd_put_char);
+  mycmd_init();
+
   sys_param_init();
   task_init();
   /* USER CODE END 2 */
@@ -137,9 +153,7 @@ int main(void)
   while (1)
   {
     // USB CDC Shell
-    if (!usb_rx_get(&ch)) {
-      shell(ch);
-    }
+    xcmd_task();
 
     // 任务事件循环
     task_loop();

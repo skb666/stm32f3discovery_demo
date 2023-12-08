@@ -3,8 +3,8 @@
 #include <string.h>
 
 #include "main.h"
-#include "nr_micro_shell.h"
 #include "param.h"
+#include "xcmd.h"
 
 typedef struct {
   GPIO_TypeDef *port;
@@ -71,45 +71,47 @@ static void led_control(const LED_GPIO *led, uint8_t sw) {
 /**
  * @brief led command
  */
-void shell_led_cmd(char argc, char *argv) {
+int shell_led_cmd(int argc, char *argv[]) {
   SYS_PARAM *sys = sys_param_get();
   LED_CTRL *leds = &sys->ctrl.leds;
   uint8_t index = 0;
   uint8_t sw = 0;
 
   if (argc > 1) {
-    if (!strcmp("all", &argv[argv[1]])) {
+    if (!strcmp("all", argv[1])) {
       if (argc <= 2) {
-        shell_printf("led: 0x%x\r\n", leds->value);
-        return;
+        xcmd_print("led: 0x%x\r\n", leds->value);
+        return 0;
       }
-      if (sscanf(&argv[argv[2]], "%hx", &leds->value) > 0) {
-        shell_printf("led control: 0x%x\r\n", leds->value);
+      if (sscanf(argv[2], "%hx", &leds->value) > 0) {
+        xcmd_print("led control: 0x%x\r\n", leds->value);
         led_control(NULL, 0);
       } else {
-        shell_printf("param error!\r\n");
+        xcmd_print("param error!\r\n");
       }
-    } else if (sscanf(&argv[argv[1]], "%hhu", &index) > 0 && index >= 3 && index <= 10) {
+    } else if (sscanf(argv[1], "%hhu", &index) > 0 && index >= 3 && index <= 10) {
       index -= 3;
       if (argc <= 2) {
-        shell_printf("LD%hhu: %d\r\n", index + 3, !!(leds->value & (1 << led_index[index])));
-        return;
+        xcmd_print("LD%hhu: %d\r\n", index + 3, !!(leds->value & (1 << led_index[index])));
+        return 0;
       }
-      if (sscanf(&argv[argv[2]], "%hhu", &sw) > 0 && sw < 2) {
+      if (sscanf(argv[2], "%hhu", &sw) > 0 && sw < 2) {
         if (sw) {
           leds->value |= (1 << led_index[index]);
         } else {
           leds->value &= ~(1 << led_index[index]);
         }
-        shell_printf("LD%hhu %s\r\n", index + 3, sw ? "ON" : "OFF");
+        xcmd_print("LD%hhu %s\r\n", index + 3, sw ? "ON" : "OFF");
         led_control(&led_list[led_index[index]], sw);
       } else {
-        shell_printf("param error!\r\n");
+        xcmd_print("param error!\r\n");
       }
     } else {
-      shell_printf("invalid arguments!\r\n");
+      xcmd_print("invalid arguments!\r\n");
     }
   } else {
-    shell_printf("led need more arguments!\r\n");
+    xcmd_print("led need more arguments!\r\n");
   }
+
+  return 0;
 }
