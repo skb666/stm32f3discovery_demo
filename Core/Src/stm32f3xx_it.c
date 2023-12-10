@@ -56,11 +56,20 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static void usart3_rx_to_usb(uint8_t *buf, uint16_t len) {
+static void usb_monitor(uint8_t *buf, uint16_t len) {
   SYS_PARAM *sys = sys_param_get();
-
-  if (sys->flag.usb_tx.usart3_rx) {
-    usb_puts(buf, len);
+  
+  switch (sys->status) {
+    case STATUS_SHELL: {
+      if (sys->flag.usb_tx.usart3_rx) {
+        usb_puts(buf, len);
+      }
+    } break;
+    case STATUS_USB_AS_USART3: {
+      usb_puts(buf, len);
+    } break;
+    default: {
+    } break;
   }
 }
 /* USER CODE END 0 */
@@ -240,10 +249,10 @@ void DMA1_Channel3_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
   if (LL_DMA_IsActiveFlag_HT3(DMA1)) {
     LL_DMA_ClearFlag_HT3(DMA1);
-    uart_dmarx_part_done_isr(usart3_rx_to_usb);
+    uart_dmarx_part_done_isr(usb_monitor);
   } else if (LL_DMA_IsActiveFlag_TC3(DMA1)) {
     LL_DMA_ClearFlag_TC3(DMA1);
-    uart_dmarx_done_isr(usart3_rx_to_usb);
+    uart_dmarx_done_isr(usb_monitor);
   }
   /* USER CODE END DMA1_Channel3_IRQn 1 */
 }
@@ -301,7 +310,7 @@ void USART3_IRQHandler(void)
   /* USER CODE BEGIN USART3_IRQn 1 */
   if (LL_USART_IsActiveFlag_IDLE(USART3)) {
     LL_USART_ClearFlag_IDLE(USART3);
-    uart_dmarx_part_done_isr(usart3_rx_to_usb);
+    uart_dmarx_part_done_isr(usb_monitor);
   }
   /* USER CODE END USART3_IRQn 1 */
 }

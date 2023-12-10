@@ -7,6 +7,12 @@
 extern "C" {
 #endif
 
+typedef enum {
+  STATUS_SHELL = 0,
+  STATUS_USB_AS_USART3,
+  STATUS_NUM,
+} SYS_STATUS;
+
 typedef struct {
   uint16_t value;
 } LED_CTRL;
@@ -26,6 +32,7 @@ typedef struct {
 } SYS_FLAG;
 
 typedef struct {
+  SYS_STATUS status;
   SYS_CTRL ctrl;
   SYS_FLAG flag;
 } SYS_PARAM;

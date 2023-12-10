@@ -25,6 +25,8 @@
 #include <stdarg.h>
 #include "ring_fifo.h"
 #include "common.h"
+#include "param.h"
+#include "device.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -182,6 +184,8 @@ static int8_t CDC_DeInit_FS(void)
 static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 {
   /* USER CODE BEGIN 5 */
+  SYS_PARAM *sys = sys_param_get();
+
   switch(cmd)
   {
     case CDC_SEND_ENCAPSULATED_COMMAND:
@@ -221,9 +225,15 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   /*                                        4 - Space                            */
   /* 6      | bDataBits  |   1   | Number Data bits (5, 6, 7, 8 or 16).          */
   /*******************************************************************************/
-    case CDC_SET_LINE_CODING:
-
-    break;
+    case CDC_SET_LINE_CODING: {
+      switch (sys->status) {
+        case STATUS_USB_AS_USART3: {
+          LL_USART_SetBaudRate(USART3, LL_RCC_GetUSARTClockFreq(LL_RCC_USART3_CLKSOURCE), LL_USART_OVERSAMPLING_16, *(uint32_t *)pbuf);
+        } break;
+        default: {
+        } break;
+      }
+    } break;
 
     case CDC_GET_LINE_CODING:
 
@@ -263,9 +273,20 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-  disable_global_irq();
-  ring_push_mult(&usb_rx_buffer, Buf, *Len);
-  enable_global_irq();
+  SYS_PARAM *sys = sys_param_get();
+
+  switch (sys->status) {
+    case STATUS_SHELL: {
+      disable_global_irq();
+      ring_push_mult(&usb_rx_buffer, Buf, *Len);
+      enable_global_irq();
+    } break;
+    case STATUS_USB_AS_USART3: {
+      uart_write(Buf, *Len);
+    } break;
+    default: {
+    } break;
+  }
 
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);

@@ -51,10 +51,7 @@
  </TraceWindow>
  <Watch1>
   <Watches active="1" update="Each Second">
-   <Watchpoint expression="Buf" name="Buf" radix="-1" linenumber="273" filename="../USB_DEVICE/App/usbd_cdc_if.c"/>
    <Watchpoint expression="sys_param" name="sys_param" radix="-1" linenumber="4" filename="../User/other/src/param.c"/>
-   <Watchpoint expression="func" name="func" radix="-1" linenumber="278" filename="../User/other/src/device.c"/>
-   <Watchpoint expression="xcmd" name="xcmd" radix="16" linenumber="1" filename="../User/xcmd/src/xcmd.c"/>
   </Watches>
  </Watch1>
  <Watch2>
@@ -67,7 +64,8 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="181" useTextEdit="1" path="../User/task_event/app/src/task_main.c" left="0" selected="1" top="128" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="12" y="210" useTextEdit="1" path="../User/task_event/app/src/task_main.c" left="0" selected="1" top="163" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="10" y="250" useTextEdit="1" path="../USB_DEVICE/App/usbd_cdc_if.c" left="0" top="282" codecName="UTF-8"/>
  </Files>
  <EMStudioWindow activeProject="stm32f3" fileDialogDefaultFilter="*" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="C:/Users/skb97/Desktop/stm32f3/User/other/src" debugSearchPath="" autoConnectCapabilities="1343"/>
 </session>

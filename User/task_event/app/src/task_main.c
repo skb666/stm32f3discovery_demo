@@ -36,11 +36,22 @@ static void task_event_process(TASK *task, void (*callback)(EVENT *)) {
   }
 }
 
-static void change_flag(void) {
+static void change_sys_status(void) {
   SYS_PARAM *sys = sys_param_get();
 
-  sys->flag.usb_tx.usart3_rx = !sys->flag.usb_tx.usart3_rx;
-  sys->flag.usb_tx.usart3_tx = !sys->flag.usb_tx.usart3_tx;
+  switch (sys->status) {
+    case STATUS_SHELL: {
+      sys->status = STATUS_USB_AS_USART3;
+      usb_printf("SYS_STATUS: USB_AS_USART3\r\n");
+    } break;
+    case STATUS_USB_AS_USART3: {
+      sys->status = STATUS_SHELL;
+      usb_printf("SYS_STATUS: SHELL\r\n");
+      LL_USART_SetBaudRate(USART3, LL_RCC_GetUSARTClockFreq(LL_RCC_USART3_CLKSOURCE), LL_USART_OVERSAMPLING_16, 921600);
+    } break;
+    default: {
+    } break;
+  }
 }
 
 /* 调试信息打印 */
@@ -55,7 +66,7 @@ static void debug_print_cb(EVENT *ev) {
   switch (ev->type) {
     case EVENT_TYPE_KEY_PRESS: {
       printf("[KEY]: PRESS\n");
-      change_flag();
+      change_sys_status();
     } break;
     case EVENT_TYPE_KEY_RELEASE: {
       printf("[KEY]: RELEASE\n");
@@ -133,8 +144,14 @@ void timer_1ms_init(void) {
 static void usart3_tx_to_usb(uint8_t *buf, uint16_t len) {
   SYS_PARAM *sys = sys_param_get();
 
-  if (sys->flag.usb_tx.usart3_tx) {
-    usb_puts(buf, len);
+  switch (sys->status) {
+    case STATUS_SHELL: {
+      if (sys->flag.usb_tx.usart3_tx) {
+        usb_puts(buf, len);
+      }
+    } break;
+    default: {
+    } break;
   }
 }
 
@@ -177,11 +194,24 @@ void main_loop_init(void) {
 }
 
 void main_loop_handle(TASK *task) {
-  // USB CDC Shell
-  xcmd_task();
+  SYS_PARAM *sys = sys_param_get();
+  uint8_t ch;
 
-  // USART3 帧解析
-  uart_frame_parse();
+  switch (sys->status) {
+    case STATUS_SHELL: {
+      // USB CDC Shell
+      xcmd_task();
+      // USART3 帧解析
+      uart_frame_parse();
+    } break;
+    case STATUS_USB_AS_USART3: {
+      // 清理 usart3_rx 缓冲区
+      if (!uart_read(&ch, 1)) {
+      }
+    } break;
+    default: {
+    } break;
+  }
 
   task_update_times(task);
 }
