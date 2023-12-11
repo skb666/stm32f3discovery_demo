@@ -41,16 +41,16 @@ static void change_sys_status(void) {
 
   switch (sys->status) {
     case STATUS_SHELL: {
-      sys->status = STATUS_USB_AS_USART3;
-      usb_printf("SYS_STATUS: USB_AS_USART3\r\n");
+      sys->status = STATUS_USB_AS_USART1;
+      usb_printf("SYS_STATUS: USB_AS_USART1\r\n");
     } break;
-    case STATUS_USB_AS_USART3: {
+    case STATUS_USB_AS_USART1: {
       sys->status = STATUS_SHELL;
       usb_printf("SYS_STATUS: SHELL\r\n");
-      LL_USART_SetBaudRate(USART3, LL_RCC_GetUSARTClockFreq(LL_RCC_USART3_CLKSOURCE), LL_USART_OVERSAMPLING_16, 921600);
-      LL_USART_SetStopBitsLength(USART3, LL_USART_STOPBITS_1);
-      LL_USART_SetParity(USART3, LL_USART_PARITY_NONE);
-      LL_USART_SetDataWidth(USART3, LL_USART_DATAWIDTH_8B);
+      LL_USART_SetBaudRate(USART1, LL_RCC_GetUSARTClockFreq(LL_RCC_USART1_CLKSOURCE), LL_USART_OVERSAMPLING_16, 115200);
+      LL_USART_SetStopBitsLength(USART1, LL_USART_STOPBITS_1);
+      LL_USART_SetParity(USART1, LL_USART_PARITY_NONE);
+      LL_USART_SetDataWidth(USART1, LL_USART_DATAWIDTH_8B);
     } break;
     default: {
     } break;
@@ -144,12 +144,12 @@ void timer_1ms_init(void) {
   task_event_subscribe(EVENT_TYPE_TICK_1MS, TASK_ID_TIMER_1MS);
 }
 
-static void usart3_tx_to_usb(uint8_t *buf, uint16_t len) {
+static void usart1_tx_to_usb(uint8_t *buf, uint16_t len) {
   SYS_PARAM *sys = sys_param_get();
 
   switch (sys->status) {
     case STATUS_SHELL: {
-      if (sys->flag.usb_tx.usart3_tx) {
+      if (sys->flag.usb_tx.usart1_tx) {
         usb_puts(buf, len);
       }
     } break;
@@ -162,7 +162,7 @@ static void timer_1ms_cb(EVENT *ev) {
   switch (ev->type) {
     case EVENT_TYPE_TICK_1MS: {
       // 串口发送
-      uart_tx_poll(usart3_tx_to_usb);
+      uart_tx_poll(usart1_tx_to_usb);
       // usb cdc 发送
       usb_tx_trans();
     } break;
@@ -204,11 +204,11 @@ void main_loop_handle(TASK *task) {
     case STATUS_SHELL: {
       // USB CDC Shell
       xcmd_task();
-      // USART3 帧解析
+      // USART1 帧解析
       uart_frame_parse();
     } break;
-    case STATUS_USB_AS_USART3: {
-      // 清理 usart3_rx 缓冲区
+    case STATUS_USB_AS_USART1: {
+      // 清理 usart1_rx 缓冲区
       uart_read(&ch, 1);
     } break;
     default: {

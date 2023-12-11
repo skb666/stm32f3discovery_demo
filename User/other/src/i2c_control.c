@@ -26,7 +26,7 @@ int shell_i2cdetect_cmd(int argc, char *argv[]) {
         usb_printf("   ");
         continue;
       }
-      res = HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 2);
+      res = HAL_I2C_IsDeviceReady(&hi2c2, addr << 1, 2, 2);
       if (res == HAL_OK) {
         usb_printf(" %02hx", addr);
       } else {

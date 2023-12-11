@@ -63,9 +63,6 @@
  <Watch4>
   <Watches active="0" update="Never"/>
  </Watch4>
- <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="41" y="8" useTextEdit="1" path="../User/other/src/mycmd.c" left="0" top="0" codecName="UTF-8"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="7" y="27" useTextEdit="1" path="../User/other/src/i2c_control.c" left="0" selected="1" top="9" codecName="UTF-8"/>
- </Files>
+ <Files/>
  <EMStudioWindow activeProject="stm32f3" fileDialogDefaultFilter="*" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="D:/work/stm32f3/User/other/src" debugSearchPath="" autoConnectCapabilities="1343"/>
 </session>

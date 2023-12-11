@@ -61,11 +61,11 @@ static void usb_monitor(uint8_t *buf, uint16_t len) {
   
   switch (sys->status) {
     case STATUS_SHELL: {
-      if (sys->flag.usb_tx.usart3_rx) {
+      if (sys->flag.usb_tx.usart1_rx) {
         usb_puts(buf, len);
       }
     } break;
-    case STATUS_USB_AS_USART3: {
+    case STATUS_USB_AS_USART1: {
       usb_puts(buf, len);
     } break;
     default: {
@@ -221,43 +221,6 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles DMA1 channel2 global interrupt.
-  */
-void DMA1_Channel2_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel2_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel2_IRQn 0 */
-
-  /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
-  if (LL_DMA_IsActiveFlag_TC2(DMA1)) {
-    LL_DMA_ClearFlag_TC2(DMA1);
-    uart_dmatx_done_isr();
-  }
-  /* USER CODE END DMA1_Channel2_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA1 channel3 global interrupt.
-  */
-void DMA1_Channel3_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel3_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel3_IRQn 0 */
-
-  /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
-  if (LL_DMA_IsActiveFlag_HT3(DMA1)) {
-    LL_DMA_ClearFlag_HT3(DMA1);
-    uart_dmarx_part_done_isr(usb_monitor);
-  } else if (LL_DMA_IsActiveFlag_TC3(DMA1)) {
-    LL_DMA_ClearFlag_TC3(DMA1);
-    uart_dmarx_done_isr(usb_monitor);
-  }
-  /* USER CODE END DMA1_Channel3_IRQn 1 */
-}
-
-/**
   * @brief This function handles DMA1 channel4 global interrupt.
   */
 void DMA1_Channel4_IRQHandler(void)
@@ -267,7 +230,10 @@ void DMA1_Channel4_IRQHandler(void)
   /* USER CODE END DMA1_Channel4_IRQn 0 */
 
   /* USER CODE BEGIN DMA1_Channel4_IRQn 1 */
-
+  if (LL_DMA_IsActiveFlag_TC4(DMA1)) {
+    LL_DMA_ClearFlag_TC4(DMA1);
+    uart_dmatx_done_isr();
+  }
   /* USER CODE END DMA1_Channel4_IRQn 1 */
 }
 
@@ -281,38 +247,72 @@ void DMA1_Channel5_IRQHandler(void)
   /* USER CODE END DMA1_Channel5_IRQn 0 */
 
   /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
-
+  if (LL_DMA_IsActiveFlag_HT5(DMA1)) {
+    LL_DMA_ClearFlag_HT5(DMA1);
+    uart_dmarx_part_done_isr(usb_monitor);
+  } else if (LL_DMA_IsActiveFlag_TC5(DMA1)) {
+    LL_DMA_ClearFlag_TC5(DMA1);
+    uart_dmarx_done_isr(usb_monitor);
+  }
   /* USER CODE END DMA1_Channel5_IRQn 1 */
 }
 
 /**
-  * @brief This function handles I2C2 event global interrupt / I2C2 wake-up interrupt through EXTI line 24.
+  * @brief This function handles DMA1 channel6 global interrupt.
   */
-void I2C2_EV_IRQHandler(void)
+void DMA1_Channel6_IRQHandler(void)
 {
-  /* USER CODE BEGIN I2C2_EV_IRQn 0 */
+  /* USER CODE BEGIN DMA1_Channel6_IRQn 0 */
 
-  /* USER CODE END I2C2_EV_IRQn 0 */
+  /* USER CODE END DMA1_Channel6_IRQn 0 */
 
-  /* USER CODE BEGIN I2C2_EV_IRQn 1 */
+  /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
 
-  /* USER CODE END I2C2_EV_IRQn 1 */
+  /* USER CODE END DMA1_Channel6_IRQn 1 */
 }
 
 /**
-  * @brief This function handles USART3 global interrupt / USART3 wake-up interrupt through EXTI line 28.
+  * @brief This function handles DMA1 channel7 global interrupt.
   */
-void USART3_IRQHandler(void)
+void DMA1_Channel7_IRQHandler(void)
 {
-  /* USER CODE BEGIN USART3_IRQn 0 */
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
 
-  /* USER CODE END USART3_IRQn 0 */
-  /* USER CODE BEGIN USART3_IRQn 1 */
-  if (LL_USART_IsActiveFlag_IDLE(USART3)) {
-    LL_USART_ClearFlag_IDLE(USART3);
+  /* USER CODE END DMA1_Channel7_IRQn 0 */
+
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 1 */
+}
+
+/**
+  * @brief This function handles I2C1 event global interrupt / I2C1 wake-up interrupt through EXTI line 23.
+  */
+void I2C1_EV_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C1_EV_IRQn 0 */
+
+  /* USER CODE END I2C1_EV_IRQn 0 */
+
+  /* USER CODE BEGIN I2C1_EV_IRQn 1 */
+
+  /* USER CODE END I2C1_EV_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART1 global interrupt / USART1 wake-up interrupt through EXTI line 25.
+  */
+void USART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+  /* USER CODE BEGIN USART1_IRQn 1 */
+  if (LL_USART_IsActiveFlag_IDLE(USART1)) {
+    LL_USART_ClearFlag_IDLE(USART1);
     uart_dmarx_part_done_isr(usb_monitor);
   }
-  /* USER CODE END USART3_IRQn 1 */
+  /* USER CODE END USART1_IRQn 1 */
 }
 
 /**
