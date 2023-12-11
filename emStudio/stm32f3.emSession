@@ -64,8 +64,8 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="12" y="210" useTextEdit="1" path="../User/task_event/app/src/task_main.c" left="0" selected="1" top="163" codecName="UTF-8"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="10" y="250" useTextEdit="1" path="../USB_DEVICE/App/usbd_cdc_if.c" left="0" top="282" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="41" y="8" useTextEdit="1" path="../User/other/src/mycmd.c" left="0" top="0" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="7" y="27" useTextEdit="1" path="../User/other/src/i2c_control.c" left="0" selected="1" top="9" codecName="UTF-8"/>
  </Files>
- <EMStudioWindow activeProject="stm32f3" fileDialogDefaultFilter="*" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="C:/Users/skb97/Desktop/stm32f3/User/other/src" debugSearchPath="" autoConnectCapabilities="1343"/>
+ <EMStudioWindow activeProject="stm32f3" fileDialogDefaultFilter="*" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="D:/work/stm32f3/User/other/src" debugSearchPath="" autoConnectCapabilities="1343"/>
 </session>

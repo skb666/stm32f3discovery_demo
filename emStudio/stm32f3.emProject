@@ -149,10 +149,12 @@
       </folder>
       <folder Name="other">
         <file file_name="../User/other/src/device.c" />
+        <file file_name="../User/other/src/i2c_control.c" />
         <file file_name="../User/other/src/led_control.c" />
         <file file_name="../User/other/src/mycmd.c" />
         <file file_name="../User/other/src/onchip_flash.c" />
         <file file_name="../User/other/src/param.c" />
+        <file file_name="../User/other/src/uart_control.c" />
       </folder>
       <folder Name="RING_FIFO">
         <file file_name="../User/RING_FIFO/src/ring_fifo.c" />
