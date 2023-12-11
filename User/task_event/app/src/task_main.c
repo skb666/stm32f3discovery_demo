@@ -48,6 +48,9 @@ static void change_sys_status(void) {
       sys->status = STATUS_SHELL;
       usb_printf("SYS_STATUS: SHELL\r\n");
       LL_USART_SetBaudRate(USART3, LL_RCC_GetUSARTClockFreq(LL_RCC_USART3_CLKSOURCE), LL_USART_OVERSAMPLING_16, 921600);
+      LL_USART_SetStopBitsLength(USART3, LL_USART_STOPBITS_1);
+      LL_USART_SetParity(USART3, LL_USART_PARITY_NONE);
+      LL_USART_SetDataWidth(USART3, LL_USART_DATAWIDTH_8B);
     } break;
     default: {
     } break;
@@ -206,8 +209,7 @@ void main_loop_handle(TASK *task) {
     } break;
     case STATUS_USB_AS_USART3: {
       // 清理 usart3_rx 缓冲区
-      if (!uart_read(&ch, 1)) {
-      }
+      uart_read(&ch, 1);
     } break;
     default: {
     } break;

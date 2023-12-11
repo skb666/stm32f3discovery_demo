@@ -55,7 +55,12 @@ ring_define_static(_CCM_DATA uint8_t, usb_tx_buffer, APP_TX_DATA_SIZE, 1);
   */
 
 /* USER CODE BEGIN PRIVATE_TYPES */
-
+typedef struct {
+  uint32_t dwDTERate;
+  uint8_t bCharFormat;
+  uint8_t bParityType;
+  uint8_t bDataBits;
+} UART_CONFIG;
 /* USER CODE END PRIVATE_TYPES */
 
 /**
@@ -185,6 +190,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 {
   /* USER CODE BEGIN 5 */
   SYS_PARAM *sys = sys_param_get();
+  UART_CONFIG *uart_conf = NULL;
 
   switch(cmd)
   {
@@ -226,9 +232,45 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   /* 6      | bDataBits  |   1   | Number Data bits (5, 6, 7, 8 or 16).          */
   /*******************************************************************************/
     case CDC_SET_LINE_CODING: {
+      uart_conf = (UART_CONFIG *)pbuf;
       switch (sys->status) {
         case STATUS_USB_AS_USART3: {
-          LL_USART_SetBaudRate(USART3, LL_RCC_GetUSARTClockFreq(LL_RCC_USART3_CLKSOURCE), LL_USART_OVERSAMPLING_16, *(uint32_t *)pbuf);
+          LL_USART_SetBaudRate(USART3, LL_RCC_GetUSARTClockFreq(LL_RCC_USART3_CLKSOURCE), LL_USART_OVERSAMPLING_16, uart_conf->dwDTERate);
+          switch (uart_conf->bCharFormat) {
+            default: {
+              LL_USART_SetStopBitsLength(USART3, LL_USART_STOPBITS_1);
+            } break;
+            case 1: {
+              LL_USART_SetStopBitsLength(USART3, LL_USART_STOPBITS_1_5);
+            } break;
+            case 2: {
+              LL_USART_SetStopBitsLength(USART3, LL_USART_STOPBITS_2);
+            } break;
+          }
+          switch (uart_conf->bParityType) {
+            default: {
+              LL_USART_SetParity(USART3, LL_USART_PARITY_NONE);
+            } break;
+            case 1: {
+              LL_USART_SetParity(USART3, LL_USART_PARITY_ODD);
+            } break;
+            case 2: {
+              LL_USART_SetParity(USART3, LL_USART_PARITY_EVEN);
+            } break;
+          }
+          switch (uart_conf->bDataBits) {
+            default: {
+              LL_USART_SetDataWidth(USART3, LL_USART_DATAWIDTH_8B);
+            } break;
+#if defined(USART_7BITS_SUPPORT)
+            case 7: {
+              LL_USART_SetDataWidth(USART3, LL_USART_DATAWIDTH_7B);
+            } break;
+#endif
+            case 9: {
+              LL_USART_SetDataWidth(USART3, LL_USART_DATAWIDTH_9B);
+            } break;
+          }
         } break;
         default: {
         } break;
