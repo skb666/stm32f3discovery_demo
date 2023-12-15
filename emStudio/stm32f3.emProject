@@ -51,6 +51,7 @@
       debug_stack_pointer_start="__stack_end__"
       debug_start_from_entry_point_symbol="Yes"
       gcc_entry_point="Reset_Handler"
+      gcc_optimization_level="Level 2 for size"
       gdb_server_command_line="C:\ST\STM32CubeIDE\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.win32_2.1.100.202310302101\tools\bin\ST-LINK_gdbserver.exe -p 61234 -l 1 -d -s -cp C:\ST\STM32CubeIDE\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.win32_2.1.100.202311100844\tools\bin -m 0 -k"
       link_linker_script_file="$(ProjectDir)/STM32F3xx_Flash_CCM.icf"
       linker_memory_map_file="$(ProjectDir)/STM32F303VCTx_MemoryMap.xml"
@@ -62,7 +63,6 @@
       project_type="Executable"
       target_reset_script="Reset();"
       target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
-    <configuration Name="Release" gcc_optimization_level="Level 2 for size" />
     <folder Name="Core">
       <file file_name="../Core/Src/common.c" />
       <file file_name="../Core/Src/crc.c" />

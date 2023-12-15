@@ -4,8 +4,8 @@
 #include <stdint.h>
 
 #define EVENT_FIFO_MAX 256
-#define EVENT_SUBSCRIBE_MAX 5
-#define TASK_EVENT_MAX 10
+#define EVENT_SUBSCRIBE_MAX 10
+#define TASK_EVENT_MAX 4
 
 #ifdef __cplusplus
 extern "C" {

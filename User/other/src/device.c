@@ -31,7 +31,7 @@ char print_buf[DEV_NUM][64];
 static void (*func_list[DEV_NUM][FUNC_LIST_MAX])(frame_parse_t *);
 
 static uint8_t __uart_tx_ring_data[DEV_NUM][UART_TX_RING_SIZE];
-static RING_FIFO uart_tx_ring[DEV_NUM] = {
+_CCM_DATA static RING_FIFO uart_tx_ring[DEV_NUM] = {
     [DEV_USART1] = {
         .buffer = __uart_tx_ring_data[DEV_USART1],
         .capacity = UART_TX_RING_SIZE,
@@ -52,7 +52,7 @@ static RING_FIFO uart_tx_ring[DEV_NUM] = {
     },
 };
 static uint8_t __uart_rx_ring_data[DEV_NUM][UART_RX_RING_SIZE];
-static RING_FIFO uart_rx_ring[DEV_NUM] = {
+_CCM_DATA static RING_FIFO uart_rx_ring[DEV_NUM] = {
     [DEV_USART1] = {
         .buffer = __uart_rx_ring_data[DEV_USART1],
         .capacity = UART_RX_RING_SIZE,
@@ -75,8 +75,8 @@ static RING_FIFO uart_rx_ring[DEV_NUM] = {
 static uint8_t uart_dmatx_buf[DEV_NUM][UART_DMATX_BUF_SIZE];
 static uint8_t uart_dmarx_buf[DEV_NUM][UART_DMARX_BUF_SIZE];
 
-static uart_device_t uart_dev[DEV_NUM] = {0};
-static frame_parse_t rx_frame[DEV_NUM] = {
+_CCM_DATA static uart_device_t uart_dev[DEV_NUM] = {0};
+_CCM_DATA static frame_parse_t rx_frame[DEV_NUM] = {
     [DEV_USART1] = {
         .status = PARSE_STAT_HEAD1,
     },

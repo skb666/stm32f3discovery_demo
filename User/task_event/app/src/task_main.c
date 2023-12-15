@@ -42,11 +42,11 @@ static void change_sys_status(void) {
   switch (sys->status) {
     case STATUS_SHELL: {
       sys->status = STATUS_USB_AS_USART1;
-      usb_printf("SYS_STATUS: USB_AS_USART1\r\n");
+      usb_printf("\r\nSYS_STATUS: USB_AS_USART1\r\n");
     } break;
     case STATUS_USB_AS_USART1: {
       sys->status = STATUS_USB_AS_USART3;
-      usb_printf("SYS_STATUS: USB_AS_USART3\r\n");
+      usb_printf("\r\nSYS_STATUS: USB_AS_USART3\r\n");
       LL_USART_SetBaudRate(USART1, LL_RCC_GetUSARTClockFreq(LL_RCC_USART1_CLKSOURCE), LL_USART_OVERSAMPLING_16, 115200);
       LL_USART_SetStopBitsLength(USART1, LL_USART_STOPBITS_1);
       LL_USART_SetParity(USART1, LL_USART_PARITY_NONE);
@@ -54,7 +54,7 @@ static void change_sys_status(void) {
     } break;
     case STATUS_USB_AS_USART3: {
       sys->status = STATUS_SHELL;
-      usb_printf("SYS_STATUS: SHELL\r\n");
+      usb_printf("\r\nSYS_STATUS: SHELL\r\n");
       LL_USART_SetBaudRate(USART3, LL_RCC_GetUSARTClockFreq(LL_RCC_USART3_CLKSOURCE), LL_USART_OVERSAMPLING_16, 115200);
       LL_USART_SetStopBitsLength(USART3, LL_USART_STOPBITS_1);
       LL_USART_SetParity(USART3, LL_USART_PARITY_NONE);
@@ -76,17 +76,25 @@ void debug_print_init(void) {
 static void debug_print_cb(EVENT *ev) {
   switch (ev->type) {
     case EVENT_TYPE_KEY_PRESS: {
+#ifdef DEBUG
       printf("[KEY]: PRESS\n");
+#endif
       change_sys_status();
     } break;
     case EVENT_TYPE_KEY_RELEASE: {
+#ifdef DEBUG
       printf("[KEY]: RELEASE\n");
+#endif
     } break;
     case EVENT_TYPE_KEY_LONG_PRESS: {
+#ifdef DEBUG
       printf("[KEY]: LONG_PRESS\n");
+#endif
     } break;
     case EVENT_TYPE_KEY_LONG_RELEASE: {
+#ifdef DEBUG
       printf("[KEY]: LONG_RELEASE\n");
+#endif
     } break;
     default: {
     } break;

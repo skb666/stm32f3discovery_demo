@@ -119,11 +119,11 @@ place in RAM1                               { section .RAM1, section .RAM1.* };
 //
 // RAM Placement
 //
-place at start of CCM_RAM                   { block vectors_ram };
+place at start of DATA_RAM                   { block vectors_ram };
 place in CCM_RAM                            { section .fast, section .fast.* };                    // "ramfunc" section
 place in DATA_RAM with auto order            { block tls,                                           // Thread-local-storage block
                                               readwrite,                                            // Catch-all for initialized/uninitialized data sections (e.g. .data, .noinit)
                                               zeroinit                                              // Catch-all for zero-initialized data sections (e.g. .bss)
                                             };
 place in DATA_RAM                            { block heap };                                        // Heap reserved block
-place at end of CCM_RAM                     { block stack };                                       // Stack reserved block at the end
+place at end of DATA_RAM                     { block stack };                                       // Stack reserved block at the end

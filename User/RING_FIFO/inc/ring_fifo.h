@@ -24,13 +24,13 @@ extern "C" {
 #endif
 
 typedef struct {
-    void *buffer;           // 数据块地址
-    NUM_TYPE capacity;      // 数据最大存放个数
-    NUM_TYPE element_size;  // 单个数据占用的字节数
-    NUM_TYPE cover;         // 是否支持覆盖
-    NUM_TYPE head;          // 起始下标
-    NUM_TYPE tail;          // 结尾下标
-    NUM_TYPE size;          // 数据实际个数
+  void *buffer;           // 数据块地址
+  NUM_TYPE capacity;      // 数据最大存放个数
+  NUM_TYPE element_size;  // 单个数据占用的字节数
+  NUM_TYPE cover;         // 是否支持覆盖
+  NUM_TYPE head;          // 起始下标
+  NUM_TYPE tail;          // 结尾下标
+  NUM_TYPE size;          // 数据实际个数
 } RING_FIFO;
 
 /**
@@ -41,17 +41,17 @@ typedef struct {
  * @param  Cover 是否支持覆盖 (0 / 1)
  * @retval None
  */
-#define ring_define(Type, BufName, Size, Cover)        \
-    Type __##BufName##_data[Size];                     \
-    RING_FIFO BufName = {                              \
-        .buffer = __##BufName##_data,                  \
-        .capacity = Size,                              \
-        .element_size = sizeof(__##BufName##_data[0]), \
-        .cover = Cover,                                \
-        .head = 0,                                     \
-        .tail = 0,                                     \
-        .size = 0,                                     \
-    }
+#define ring_define(Type, BufName, Size, Cover)      \
+  Type __##BufName##_data[Size];                     \
+  RING_FIFO BufName = {                              \
+      .buffer = __##BufName##_data,                  \
+      .capacity = Size,                              \
+      .element_size = sizeof(__##BufName##_data[0]), \
+      .cover = Cover,                                \
+      .head = 0,                                     \
+      .tail = 0,                                     \
+      .size = 0,                                     \
+  }
 
 /**
  * @brief  定义 RING_FIFO 静态变量
@@ -62,16 +62,16 @@ typedef struct {
  * @retval None
  */
 #define ring_define_static(Type, BufName, Size, Cover) \
-    static Type __##BufName##_data[Size];              \
-    static RING_FIFO BufName = {                       \
-        .buffer = __##BufName##_data,                  \
-        .capacity = Size,                              \
-        .element_size = sizeof(__##BufName##_data[0]), \
-        .cover = Cover,                                \
-        .head = 0,                                     \
-        .tail = 0,                                     \
-        .size = 0,                                     \
-    }
+  static Type __##BufName##_data[Size];                \
+  static RING_FIFO BufName = {                         \
+      .buffer = __##BufName##_data,                    \
+      .capacity = Size,                                \
+      .element_size = sizeof(__##BufName##_data[0]),   \
+      .cover = Cover,                                  \
+      .head = 0,                                       \
+      .tail = 0,                                       \
+      .size = 0,                                       \
+  }
 
 /**
  * @brief  放入单个数据

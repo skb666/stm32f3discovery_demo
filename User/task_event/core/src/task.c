@@ -5,8 +5,8 @@
 
 #include "common.h"
 
-ring_define_static(EVENT, s_event_fifo, EVENT_FIFO_MAX, 0);
-static TASK_EVENT s_task_event_list[EVENT_TYPE_MAX];
+ring_define_static(_CCM_DATA EVENT, s_event_fifo, EVENT_FIFO_MAX, 0);
+_CCM_DATA static TASK_EVENT s_task_event_list[EVENT_TYPE_MAX];
 
 static int task_sort_cmp(const void *task_a, const void *task_b) {
   if (((TASK *)task_a)->id > ((TASK *)task_b)->id) {

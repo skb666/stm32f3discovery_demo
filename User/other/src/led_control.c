@@ -80,11 +80,11 @@ int shell_led_cmd(int argc, char *argv[]) {
   if (argc > 1) {
     if (!strcmp("all", argv[1])) {
       if (argc <= 2) {
-        xcmd_print("led: 0x%x\r\n", leds->value);
+        xcmd_print("led: 0x%02x\r\n", leds->value);
         return 0;
       }
       if (sscanf(argv[2], "%hx", &leds->value) > 0) {
-        xcmd_print("led control: 0x%x\r\n", leds->value);
+        xcmd_print("led control: 0x%02x\r\n", leds->value);
         led_control(NULL, 0);
       } else {
         xcmd_print("param error!\r\n");
