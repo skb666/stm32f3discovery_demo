@@ -10,6 +10,7 @@ extern "C" {
 typedef enum {
   STATUS_SHELL = 0,
   STATUS_USB_AS_USART1,
+  STATUS_USB_AS_USART3,
   STATUS_NUM,
 } SYS_STATUS;
 
@@ -24,7 +25,9 @@ typedef struct {
 typedef struct {
   uint8_t usart1_rx : 1;
   uint8_t usart1_tx : 1;
-  uint8_t : 6;
+  uint8_t usart3_rx : 1;
+  uint8_t usart3_tx : 1;
+  uint8_t : 4;
 } USB_TX_FLAG;
 
 typedef struct {

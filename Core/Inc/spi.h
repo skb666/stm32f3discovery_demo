@@ -37,8 +37,6 @@ extern "C" {
 /* USER CODE END Private defines */
 
 void MX_SPI1_Init(void);
-void MX_SPI2_Init(void);
-void MX_SPI3_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 

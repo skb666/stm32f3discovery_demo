@@ -272,6 +272,44 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
             } break;
           }
         } break;
+        case STATUS_USB_AS_USART3: {
+          LL_USART_SetBaudRate(USART3, LL_RCC_GetUSARTClockFreq(LL_RCC_USART3_CLKSOURCE), LL_USART_OVERSAMPLING_16, uart_conf->dwDTERate);
+          switch (uart_conf->bCharFormat) {
+            default: {
+              LL_USART_SetStopBitsLength(USART3, LL_USART_STOPBITS_1);
+            } break;
+            case 1: {
+              LL_USART_SetStopBitsLength(USART3, LL_USART_STOPBITS_1_5);
+            } break;
+            case 2: {
+              LL_USART_SetStopBitsLength(USART3, LL_USART_STOPBITS_2);
+            } break;
+          }
+          switch (uart_conf->bParityType) {
+            default: {
+              LL_USART_SetParity(USART3, LL_USART_PARITY_NONE);
+            } break;
+            case 1: {
+              LL_USART_SetParity(USART3, LL_USART_PARITY_ODD);
+            } break;
+            case 2: {
+              LL_USART_SetParity(USART3, LL_USART_PARITY_EVEN);
+            } break;
+          }
+          switch (uart_conf->bDataBits) {
+            default: {
+              LL_USART_SetDataWidth(USART3, LL_USART_DATAWIDTH_8B);
+            } break;
+#if defined(USART_7BITS_SUPPORT)
+            case 7: {
+              LL_USART_SetDataWidth(USART3, LL_USART_DATAWIDTH_7B);
+            } break;
+#endif
+            case 9: {
+              LL_USART_SetDataWidth(USART3, LL_USART_DATAWIDTH_9B);
+            } break;
+          }
+        } break;
         default: {
         } break;
       }
@@ -324,7 +362,10 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
       enable_global_irq();
     } break;
     case STATUS_USB_AS_USART1: {
-      uart_write(Buf, *Len);
+      uart_write(DEV_USART1, Buf, *Len);
+    } break;
+    case STATUS_USB_AS_USART3: {
+      uart_write(DEV_USART3, Buf, *Len);
     } break;
     default: {
     } break;

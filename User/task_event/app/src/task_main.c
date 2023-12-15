@@ -45,12 +45,20 @@ static void change_sys_status(void) {
       usb_printf("SYS_STATUS: USB_AS_USART1\r\n");
     } break;
     case STATUS_USB_AS_USART1: {
-      sys->status = STATUS_SHELL;
-      usb_printf("SYS_STATUS: SHELL\r\n");
+      sys->status = STATUS_USB_AS_USART3;
+      usb_printf("SYS_STATUS: USB_AS_USART3\r\n");
       LL_USART_SetBaudRate(USART1, LL_RCC_GetUSARTClockFreq(LL_RCC_USART1_CLKSOURCE), LL_USART_OVERSAMPLING_16, 115200);
       LL_USART_SetStopBitsLength(USART1, LL_USART_STOPBITS_1);
       LL_USART_SetParity(USART1, LL_USART_PARITY_NONE);
       LL_USART_SetDataWidth(USART1, LL_USART_DATAWIDTH_8B);
+    } break;
+    case STATUS_USB_AS_USART3: {
+      sys->status = STATUS_SHELL;
+      usb_printf("SYS_STATUS: SHELL\r\n");
+      LL_USART_SetBaudRate(USART3, LL_RCC_GetUSARTClockFreq(LL_RCC_USART3_CLKSOURCE), LL_USART_OVERSAMPLING_16, 115200);
+      LL_USART_SetStopBitsLength(USART3, LL_USART_STOPBITS_1);
+      LL_USART_SetParity(USART3, LL_USART_PARITY_NONE);
+      LL_USART_SetDataWidth(USART3, LL_USART_DATAWIDTH_8B);
     } break;
     default: {
     } break;
@@ -158,11 +166,26 @@ static void usart1_tx_to_usb(uint8_t *buf, uint16_t len) {
   }
 }
 
+static void usart3_tx_to_usb(uint8_t *buf, uint16_t len) {
+  SYS_PARAM *sys = sys_param_get();
+
+  switch (sys->status) {
+    case STATUS_SHELL: {
+      if (sys->flag.usb_tx.usart3_tx) {
+        usb_puts(buf, len);
+      }
+    } break;
+    default: {
+    } break;
+  }
+}
+
 static void timer_1ms_cb(EVENT *ev) {
   switch (ev->type) {
     case EVENT_TYPE_TICK_1MS: {
       // 串口发送
-      uart_tx_poll(usart1_tx_to_usb);
+      uart_tx_poll(DEV_USART1, usart1_tx_to_usb);
+      uart_tx_poll(DEV_USART3, usart3_tx_to_usb);
       // usb cdc 发送
       usb_tx_trans();
     } break;
@@ -185,15 +208,20 @@ static int cmd_put_char(uint8_t ch) {
   return 1;
 }
 
-static void print_frame(frame_parse_t *frame) {
-  uart_write(frame->data, frame->length);
+static void print_frame_usart1(frame_parse_t *frame) {
+  uart_write(DEV_USART1, frame->data, frame->length);
+}
+
+static void print_frame_usart3(frame_parse_t *frame) {
+  uart_write(DEV_USART3, frame->data, frame->length);
 }
 
 void main_loop_init(void) {
   xcmd_init(cmd_get_char, cmd_put_char);
   mycmd_init();
 
-  frame_parse_register(FRAME_TYPE_DEBUG, print_frame);
+  frame_parse_register(DEV_USART1, FRAME_TYPE_DEBUG, print_frame_usart1);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_DEBUG, print_frame_usart3);
 }
 
 void main_loop_handle(TASK *task) {
@@ -205,11 +233,21 @@ void main_loop_handle(TASK *task) {
       // USB CDC Shell
       xcmd_task();
       // USART1 帧解析
-      uart_frame_parse();
+      uart_frame_parse(DEV_USART1);
+      // USART3 帧解析
+      uart_frame_parse(DEV_USART3);
     } break;
     case STATUS_USB_AS_USART1: {
+      // USART3 帧解析
+      uart_frame_parse(DEV_USART3);
       // 清理 usart1_rx 缓冲区
-      uart_read(&ch, 1);
+      uart_read(DEV_USART1, &ch, 1);
+    } break;
+    case STATUS_USB_AS_USART3: {
+      // USART1 帧解析
+      uart_frame_parse(DEV_USART1);
+      // 清理 usart3_rx 缓冲区
+      uart_read(DEV_USART3, &ch, 1);
     } break;
     default: {
     } break;
