@@ -11,7 +11,7 @@
 #define FRAME_HEAD1 0x55
 #define FRAME_HEAD2 0xAA
 
-#define FUNC_LIST_MAX 250
+#define FUNC_LIST_MAX 254
 
 typedef enum {
   PARSE_STAT_HEAD1 = 0,
@@ -350,7 +350,7 @@ void uart_frame_parse(DEV_TYPE dev_type) {
           rx_frame[dev_type].status = PARSE_STAT_LENGTH;
         } else {
           rx_frame[dev_type].status = PARSE_STAT_HEAD1;
-          Error_Handler();
+          //Error_Handler();
         }
       }
     } break;

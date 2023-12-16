@@ -4,7 +4,7 @@
 
 #include "i2c.h"
 #include "main.h"
-#include "usbd_cdc_if.h"
+#include "xcmd.h"
 
 int shell_i2cdetect_cmd(int argc, char *argv[]) {
   HAL_StatusTypeDef res;
@@ -17,23 +17,23 @@ int shell_i2cdetect_cmd(int argc, char *argv[]) {
     }
   }
 
-  usb_printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\r\n");
+  xcmd_print("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\r\n");
   for (uint8_t i = 0; i < 8; ++i) {
-    usb_printf("%02hhx:", i * 16);
+    xcmd_print("%02hhx:", i * 16);
     for (uint8_t j = 0; j < 16; ++j) {
       addr = i * 16 + j;
       if (filter && (addr < 0x03 || addr >= 0x78)) {
-        usb_printf("   ");
+        xcmd_print("   ");
         continue;
       }
       res = HAL_I2C_IsDeviceReady(&hi2c2, addr << 1, 2, 2);
       if (res == HAL_OK) {
-        usb_printf(" %02hx", addr);
+        xcmd_print(" %02hx", addr);
       } else {
-        usb_printf(" --");
+        xcmd_print(" --");
       }
     }
-    usb_printf("\r\n");
+    xcmd_print("\r\n");
   }
 
   return 0;
