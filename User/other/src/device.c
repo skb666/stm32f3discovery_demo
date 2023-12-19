@@ -24,7 +24,7 @@ typedef enum {
 typedef struct {
   volatile uint16_t status; /* 发送状态 */
   uint16_t last_dmarx_size; /* dma上一次接收数据大小 */
-} uart_device_t;
+} device_t;
 
 char print_buf[DEV_NUM][64];
 
@@ -75,7 +75,7 @@ _CCM_DATA static RING_FIFO uart_rx_ring[DEV_NUM] = {
 static uint8_t uart_dmatx_buf[DEV_NUM][UART_DMATX_BUF_SIZE];
 static uint8_t uart_dmarx_buf[DEV_NUM][UART_DMARX_BUF_SIZE];
 
-_CCM_DATA static uart_device_t uart_dev[DEV_NUM] = {0};
+_CCM_DATA static device_t uart_dev[DEV_NUM] = {0};
 _CCM_DATA static frame_parse_t rx_frame[DEV_NUM] = {
     [DEV_USART1] = {
         .status = PARSE_STAT_HEAD1,
@@ -217,6 +217,8 @@ void uart_dmatx_done_isr(DEV_TYPE dev_type) {
 }
 
 void uart_wait_tx(DEV_TYPE dev_type) {
+  while (!uart_dev[dev_type].status) {
+  }
   while (uart_dev[dev_type].status) {
   }
 }

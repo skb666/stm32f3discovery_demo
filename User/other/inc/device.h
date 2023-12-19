@@ -44,12 +44,11 @@ void change_byte_order(uint8_t *addr, size_t size);
 int8_t frame_parse_register(DEV_TYPE dev_type, uint8_t index, void (*func)(frame_parse_t *));
 void uart_frame_parse(DEV_TYPE dev_type);
 
-#define uart_printf(dev_type, fmt, args...)                                  \
-  do {                                                                       \
-    uart_wait_tx(dev_type);                                                  \
-    sprintf((char *)print_buf[dev_type], fmt, ##args);                       \
-    uart_write((uint8_t *)print_buf[dev_type], strlen(print_buf[dev_type])); \
-    uart_wait_tx(dev_type);                                                  \
+#define uart_printf(dev_type, fmt, args...)                                            \
+  do {                                                                                 \
+    sprintf((char *)print_buf[dev_type], fmt, ##args);                                 \
+    uart_write(dev_type, (uint8_t *)print_buf[dev_type], strlen(print_buf[dev_type])); \
+    uart_wait_tx(dev_type);                                                            \
   } while (0)
 
 #ifdef __cplusplus

@@ -51,8 +51,8 @@ define memory with size = 4G;
 // Combined regions per memory type
 //
 define region FLASH = FLASH1;
-define region CCM_RAM = CCM_RAM1;
-define region DATA_RAM = RAM1;
+define region INST_RAM = RAM1;
+define region DATA_RAM = CCM_RAM1 + RAM1;
 
 //
 // Block definitions
@@ -120,8 +120,8 @@ place in RAM1                               { section .RAM1, section .RAM1.* };
 // RAM Placement
 //
 place at start of DATA_RAM                   { block vectors_ram };
-place in CCM_RAM                            { section .fast, section .fast.* };                    // "ramfunc" section
-place in DATA_RAM with auto order            { block tls,                                           // Thread-local-storage block
+place in INST_RAM                            { section .fast, section .fast.* };                    // "ramfunc" section
+place in INST_RAM with auto order            { block tls,                                           // Thread-local-storage block
                                               readwrite,                                            // Catch-all for initialized/uninitialized data sections (e.g. .data, .noinit)
                                               zeroinit                                              // Catch-all for zero-initialized data sections (e.g. .bss)
                                             };

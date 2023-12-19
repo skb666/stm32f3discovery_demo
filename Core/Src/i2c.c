@@ -108,7 +108,7 @@ void MX_I2C1_Init(void)
   I2C_InitStruct.Timing = 0x2010091A;
   I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
   I2C_InitStruct.DigitalFilter = 0;
-  I2C_InitStruct.OwnAddress1 = 0;
+  I2C_InitStruct.OwnAddress1 = 66;
   I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
   I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
   LL_I2C_Init(I2C1, &I2C_InitStruct);
