@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #define _CCM_DATA __attribute__((section(".CCM_RAM1.data")))
+#define _RAM_DATA __attribute__((section(".RAM1.data")))
 #define ARRAY_SIZE(array_name) ((int)(sizeof(array_name) / sizeof(array_name[0])))
 
 #ifdef __cplusplus

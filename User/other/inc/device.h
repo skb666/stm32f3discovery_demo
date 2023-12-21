@@ -5,16 +5,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ring_fifo.h"
-
-#define FRAME_DATA_LEN_MAX 1024
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef enum {
   DEV_USART1,
+  //DEV_USART2,
   DEV_USART3,
   DEV_NUM,
 } DEV_TYPE;
@@ -25,7 +22,7 @@ typedef struct {
   uint8_t byte_order;
   uint16_t length;
   uint16_t recv_size;
-  uint8_t data[FRAME_DATA_LEN_MAX];
+  uint8_t *data;
 } frame_parse_t;
 
 extern char print_buf[DEV_NUM][64];

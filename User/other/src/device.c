@@ -2,15 +2,16 @@
 
 #include "common.h"
 #include "main.h"
+#include "ring_fifo.h"
 
-#define UART_TX_RING_SIZE 1280
 #define UART_RX_RING_SIZE 1280
-#define UART_DMATX_BUF_SIZE 256
+#define UART_TX_RING_SIZE 1280
 #define UART_DMARX_BUF_SIZE 256
+#define UART_DMATX_BUF_SIZE 256
 
+#define FRAME_DATA_LEN_MAX 1280
 #define FRAME_HEAD1 0x55
 #define FRAME_HEAD2 0xAA
-
 #define FUNC_LIST_MAX 254
 
 typedef enum {
@@ -24,66 +25,24 @@ typedef enum {
 typedef struct {
   volatile uint16_t status; /* 发送状态 */
   uint16_t last_dmarx_size; /* dma上一次接收数据大小 */
-} device_t;
+  RING_FIFO rx_ring;
+  RING_FIFO tx_ring;
+} uart_device_t;
 
 char print_buf[DEV_NUM][64];
 
 static void (*func_list[DEV_NUM][FUNC_LIST_MAX])(frame_parse_t *);
 
-static uint8_t __uart_tx_ring_data[DEV_NUM][UART_TX_RING_SIZE];
-_CCM_DATA static RING_FIFO uart_tx_ring[DEV_NUM] = {
-    [DEV_USART1] = {
-        .buffer = __uart_tx_ring_data[DEV_USART1],
-        .capacity = UART_TX_RING_SIZE,
-        .element_size = sizeof(__uart_tx_ring_data[DEV_USART1][0]),
-        .cover = 1,
-        .head = 0,
-        .tail = 0,
-        .size = 0,
-    },
-    [DEV_USART3] = {
-        .buffer = __uart_tx_ring_data[DEV_USART3],
-        .capacity = UART_TX_RING_SIZE,
-        .element_size = sizeof(__uart_tx_ring_data[DEV_USART3][0]),
-        .cover = 1,
-        .head = 0,
-        .tail = 0,
-        .size = 0,
-    },
-};
-static uint8_t __uart_rx_ring_data[DEV_NUM][UART_RX_RING_SIZE];
-_CCM_DATA static RING_FIFO uart_rx_ring[DEV_NUM] = {
-    [DEV_USART1] = {
-        .buffer = __uart_rx_ring_data[DEV_USART1],
-        .capacity = UART_RX_RING_SIZE,
-        .element_size = sizeof(__uart_rx_ring_data[DEV_USART1][0]),
-        .cover = 1,
-        .head = 0,
-        .tail = 0,
-        .size = 0,
-    },
-    [DEV_USART3] = {
-        .buffer = __uart_rx_ring_data[DEV_USART3],
-        .capacity = UART_RX_RING_SIZE,
-        .element_size = sizeof(__uart_rx_ring_data[DEV_USART3][0]),
-        .cover = 1,
-        .head = 0,
-        .tail = 0,
-        .size = 0,
-    },
-};
-static uint8_t uart_dmatx_buf[DEV_NUM][UART_DMATX_BUF_SIZE];
-static uint8_t uart_dmarx_buf[DEV_NUM][UART_DMARX_BUF_SIZE];
+_RAM_DATA static uint8_t uart_dmarx_buf[DEV_NUM][UART_DMARX_BUF_SIZE];
+_RAM_DATA static uint8_t uart_dmatx_buf[DEV_NUM][UART_DMATX_BUF_SIZE];
 
-_CCM_DATA static device_t uart_dev[DEV_NUM] = {0};
-_CCM_DATA static frame_parse_t rx_frame[DEV_NUM] = {
-    [DEV_USART1] = {
-        .status = PARSE_STAT_HEAD1,
-    },
-    [DEV_USART3] = {
-        .status = PARSE_STAT_HEAD1,
-    },
-};
+static uint8_t __uart_rx_ring_data[DEV_NUM][UART_RX_RING_SIZE];
+static uint8_t __uart_tx_ring_data[DEV_NUM][UART_TX_RING_SIZE];
+
+static uint8_t __frame_data[DEV_NUM][FRAME_DATA_LEN_MAX];
+
+_CCM_DATA static uart_device_t uart_dev[DEV_NUM];
+_CCM_DATA static frame_parse_t rx_frame[DEV_NUM];
 
 void uart_config(DEV_TYPE dev_type) {
   switch (dev_type) {
@@ -150,8 +109,31 @@ void uart_config(DEV_TYPE dev_type) {
       LL_USART_EnableIT_IDLE(USART3);
     } break;
     default: {
+      return;
     } break;
   }
+
+  /* INIT */
+  uart_dev[dev_type].rx_ring = (RING_FIFO){
+      .buffer = __uart_rx_ring_data[dev_type],
+      .capacity = UART_RX_RING_SIZE,
+      .element_size = sizeof(__uart_rx_ring_data[dev_type][0]),
+      .cover = 1,
+      .head = 0,
+      .tail = 0,
+      .size = 0,
+  };
+  uart_dev[dev_type].tx_ring = (RING_FIFO){
+      .buffer = __uart_tx_ring_data[dev_type],
+      .capacity = UART_TX_RING_SIZE,
+      .element_size = sizeof(__uart_tx_ring_data[dev_type][0]),
+      .cover = 1,
+      .head = 0,
+      .tail = 0,
+      .size = 0,
+  };
+
+  rx_frame[dev_type].data = __frame_data[dev_type];
 }
 
 /**
@@ -165,7 +147,7 @@ void uart_dmarx_done_isr(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_t)) {
   recv_size = UART_DMARX_BUF_SIZE - uart_dev[dev_type].last_dmarx_size;
 
   disable_global_irq();
-  ring_push_mult(&uart_rx_ring[dev_type], &uart_dmarx_buf[dev_type][uart_dev[dev_type].last_dmarx_size], recv_size);
+  ring_push_mult(&uart_dev[dev_type].rx_ring, &uart_dmarx_buf[dev_type][uart_dev[dev_type].last_dmarx_size], recv_size);
   enable_global_irq();
 
   if (func) {
@@ -197,7 +179,7 @@ void uart_dmarx_part_done_isr(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_
   recv_size = recv_total_size - uart_dev[dev_type].last_dmarx_size;
 
   disable_global_irq();
-  ring_push_mult(&uart_rx_ring[dev_type], &uart_dmarx_buf[dev_type][uart_dev[dev_type].last_dmarx_size], recv_size);
+  ring_push_mult(&uart_dev[dev_type].rx_ring, &uart_dmarx_buf[dev_type][uart_dev[dev_type].last_dmarx_size], recv_size);
   enable_global_irq();
 
   if (func) {
@@ -230,12 +212,12 @@ void uart_tx_poll(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_t)) {
     return;
   }
 
-  if (ring_is_empty(&uart_tx_ring[dev_type])) {
+  if (ring_is_empty(&uart_dev[dev_type].tx_ring)) {
     return;
   }
 
   disable_global_irq();
-  size = ring_pop_mult(&uart_tx_ring[dev_type], uart_dmatx_buf[dev_type], UART_DMATX_BUF_SIZE);
+  size = ring_pop_mult(&uart_dev[dev_type].tx_ring, uart_dmatx_buf[dev_type], UART_DMATX_BUF_SIZE);
   enable_global_irq();
 
   if (func) {
@@ -267,12 +249,12 @@ uint16_t uart_read(DEV_TYPE dev_type, uint8_t *buf, uint16_t size) {
     return 0;
   }
 
-  if (ring_is_empty(&uart_rx_ring[dev_type])) {
+  if (ring_is_empty(&uart_dev[dev_type].rx_ring)) {
     return 0;
   }
 
   disable_global_irq();
-  ok = ring_pop_mult(&uart_rx_ring[dev_type], buf, size);
+  ok = ring_pop_mult(&uart_dev[dev_type].rx_ring, buf, size);
   enable_global_irq();
 
   return ok;
@@ -286,7 +268,7 @@ uint16_t uart_write(DEV_TYPE dev_type, const uint8_t *buf, uint16_t size) {
   }
 
   disable_global_irq();
-  ok = ring_push_mult(&uart_tx_ring[dev_type], buf, size);
+  ok = ring_push_mult(&uart_dev[dev_type].tx_ring, buf, size);
   enable_global_irq();
 
   return ok;
@@ -352,7 +334,7 @@ void uart_frame_parse(DEV_TYPE dev_type) {
           rx_frame[dev_type].status = PARSE_STAT_LENGTH;
         } else {
           rx_frame[dev_type].status = PARSE_STAT_HEAD1;
-          //Error_Handler();
+          // Error_Handler();
         }
       }
     } break;

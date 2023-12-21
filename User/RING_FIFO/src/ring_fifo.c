@@ -109,6 +109,25 @@ int8_t ring_pop_unread(RING_FIFO *ring) {
   return 0;
 }
 
+NUM_TYPE ring_pop_mult_unread(RING_FIFO *ring, NUM_TYPE num) {
+  NUM_TYPE cnt = 0;
+
+  if (ring == NULL || ring->size == 0 || num == 0) {
+    return 0;
+  }
+
+  if (num >= ring->size) {
+    cnt = ring->size;
+    ring_reset(ring);
+  } else {
+    cnt = num;
+    ring->head = (ring->head + cnt) % ring->capacity;
+    ring->size -= cnt;
+  }
+
+  return cnt;
+}
+
 void *ring_peek(RING_FIFO *ring) {
   if (ring == NULL || ring->size == 0) {
     return NULL;

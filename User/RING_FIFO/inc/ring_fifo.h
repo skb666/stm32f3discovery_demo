@@ -106,6 +106,14 @@ int8_t ring_pop(RING_FIFO *ring, void *element);
 int8_t ring_pop_unread(RING_FIFO *ring);
 
 /**
+ * @brief  弹出多个数据
+ * @param  ring RING_FIFO 变量的地址
+ * @param  num 弹出数据的个数
+ * @retval 成功弹出几个
+ */
+NUM_TYPE ring_pop_mult_unread(RING_FIFO *ring, NUM_TYPE num);
+
+/**
  * @brief  获取下一个被取出数据的地址
  * @param  ring RING_FIFO 变量的地址
  * @retval 成功时返回数据地址，否则返回 NULL
