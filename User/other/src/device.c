@@ -274,17 +274,6 @@ uint16_t uart_write(DEV_TYPE dev_type, const uint8_t *buf, uint16_t size) {
   return ok;
 }
 
-void change_byte_order(uint8_t *addr, size_t size) {
-  uint8_t tmp;
-  size_t i, imax = size / 2;
-
-  for (i = 0; i < imax; ++i) {
-    tmp = addr[i];
-    addr[i] = addr[size - i - 1];
-    addr[size - i - 1] = tmp;
-  }
-}
-
 int8_t frame_parse_register(DEV_TYPE dev_type, uint8_t index, void (*func)(frame_parse_t *)) {
   if (func == 0 || index >= FUNC_LIST_MAX) {
     return -1;

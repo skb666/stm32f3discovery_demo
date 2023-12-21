@@ -1,7 +1,5 @@
 #include "common.h"
 
-#include <stdint.h>
-
 #include "main.h"
 
 static uint32_t s_irq_count = 0;
@@ -25,4 +23,15 @@ void enable_global_irq(void) {
     __enable_irq();
   }
   return;
+}
+
+void change_byte_order(uint8_t *addr, size_t size) {
+  uint8_t tmp;
+  size_t i, imax = size / 2;
+
+  for (i = 0; i < imax; ++i) {
+    tmp = addr[i];
+    addr[i] = addr[size - i - 1];
+    addr[size - i - 1] = tmp;
+  }
 }

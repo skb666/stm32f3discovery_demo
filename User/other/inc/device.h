@@ -37,7 +37,6 @@ void uart_tx_poll(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_t));
 uint16_t uart_read(DEV_TYPE dev_type, uint8_t *buf, uint16_t size);
 uint16_t uart_write(DEV_TYPE dev_type, const uint8_t *buf, uint16_t size);
 
-void change_byte_order(uint8_t *addr, size_t size);
 int8_t frame_parse_register(DEV_TYPE dev_type, uint8_t index, void (*func)(frame_parse_t *));
 void uart_frame_parse(DEV_TYPE dev_type);
 

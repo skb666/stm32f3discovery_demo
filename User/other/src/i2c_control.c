@@ -6,6 +6,9 @@
 #include "main.h"
 #include "xcmd.h"
 
+uint8_t i2c_tx_buf[2] = {0x00, 0x00};
+uint8_t i2c_rx_buf[2];
+
 int shell_i2cdetect_cmd(int argc, char *argv[]) {
   HAL_StatusTypeDef res;
   uint16_t addr = 0;
@@ -35,6 +38,23 @@ int shell_i2cdetect_cmd(int argc, char *argv[]) {
     }
     xcmd_print("\r\n");
   }
+
+  uint8_t test[] = {0x00, 0x01, 0x00, 0xdd};
+  HAL_I2C_Master_Transmit_IT(&hi2c2, 0x33 << 1, test, sizeof(test));
+  while (HAL_I2C_GetState(&hi2c2) != HAL_I2C_STATE_READY) {
+  }
+
+  HAL_I2C_Master_Transmit_IT(&hi2c2, 0x33 << 1, i2c_tx_buf, sizeof(i2c_tx_buf));
+  while (HAL_I2C_GetState(&hi2c2) != HAL_I2C_STATE_READY) {
+  }
+  HAL_I2C_Master_Receive_IT(&hi2c2, 0x33 << 1, i2c_rx_buf, sizeof(i2c_rx_buf));
+  while (HAL_I2C_GetState(&hi2c2) != HAL_I2C_STATE_READY) {
+  }
+
+  for (size_t i = 0; i < sizeof(i2c_rx_buf); ++i) {
+    printf("0x%02x ", i2c_rx_buf[i]);
+  }
+  printf("\r\n");
 
   return 0;
 }

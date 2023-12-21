@@ -32,6 +32,7 @@
 #include "task.h"
 #include "device.h"
 #include "param.h"
+#include "i2c_slave.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -126,6 +127,7 @@ int main(void)
   LL_mDelay(800);
   sys_param_init();
   task_init();
+  i2c_slave_config();
   /* USER CODE END 2 */
 
   /* Infinite loop */

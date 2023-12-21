@@ -68,6 +68,20 @@ static void led_control(const LED_GPIO *led, uint8_t sw) {
   }
 }
 
+void led_all_control(void) {
+  SYS_PARAM *sys = sys_param_get();
+  LED_CTRL leds = sys->ctrl.leds;
+  size_t i = 0;
+
+  for (i = 0; i < LED_NUM; ++i, leds.value >>= 1) {
+    if (leds.value & 1) {
+      LL_GPIO_SetOutputPin(led_list[i].port, led_list[i].pin);
+    } else {
+      LL_GPIO_ResetOutputPin(led_list[i].port, led_list[i].pin);
+    }
+  }
+}
+
 /**
  * @brief led command
  */

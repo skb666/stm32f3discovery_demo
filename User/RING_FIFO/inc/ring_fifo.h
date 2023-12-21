@@ -139,6 +139,14 @@ NUM_TYPE ring_push_mult(RING_FIFO *ring, const void *elements, NUM_TYPE num);
 NUM_TYPE ring_pop_mult(RING_FIFO *ring, void *elements, NUM_TYPE num);
 
 /**
+ * @brief  深拷贝 RING_FIFO
+ * @param  ring_dst 目标 RING_FIFO 变量的地址
+ * @param  ring_src 源 RING_FIFO 变量的地址
+ * @retval 成功返回 0，否则返回 -1
+ */
+int8_t ring_deep_copy(RING_FIFO *ring_dst, RING_FIFO *ring_src);
+
+/**
  * @brief  重置 RING_FIFO
  * @param  ring RING_FIFO 变量的地址
  * @retval None

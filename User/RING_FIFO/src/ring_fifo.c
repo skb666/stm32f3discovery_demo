@@ -253,6 +253,24 @@ NUM_TYPE ring_pop_mult(RING_FIFO *ring, void *elements, NUM_TYPE num) {
   return cnt;
 }
 
+int8_t ring_deep_copy(RING_FIFO *ring_dst, RING_FIFO *ring_src) {
+  if ((ring_dst == NULL || ring_dst->buffer == NULL) || (ring_src == NULL || ring_src->buffer == NULL)) {
+    return -1;
+  }
+
+  if ((ring_dst->capacity != ring_src->capacity) || (ring_dst->element_size != ring_src->element_size)) {
+    return -1;
+  }
+  
+  memcpy(ring_dst->buffer, ring_src->buffer, ring_src->capacity * ring_src->element_size);
+  ring_dst->cover = ring_src->cover;
+  ring_dst->head = ring_src->head;
+  ring_dst->tail = ring_src->tail;
+  ring_dst->size = ring_src->size;
+
+  return 0;
+}
+
 void ring_reset(RING_FIFO *ring) {
   ring->head = 0;
   ring->tail = 0;
