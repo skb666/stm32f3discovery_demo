@@ -29,7 +29,6 @@
   <ProjectSessionItem path="stm32f3;stm32f3;User;RING_FIFO"/>
   <ProjectSessionItem path="stm32f3;stm32f3;User;task_event"/>
   <ProjectSessionItem path="stm32f3;stm32f3;User;task_event;app"/>
-  <ProjectSessionItem path="stm32f3;stm32f3;User;task_event;core"/>
   <ProjectSessionItem path="stm32f3;stm32f3;User;task_event;user"/>
  </Project>
  <Register1>
@@ -52,7 +51,7 @@
  </TraceWindow>
  <Watch1>
   <Watches active="1" update="Each Second">
-   <Watchpoint expression="i2c_dev" name="i2c_dev" radix="16" linenumber="32" filename="../User/other/src/i2c_slave.c"/>
+   <Watchpoint expression="i2c_dev" name="i2c_dev" radix="16" linenumber="75" filename="../User/other/src/i2c_slave.c"/>
    <Watchpoint expression="sys_param" name="sys_param" radix="16" linenumber="4" filename="../User/other/src/param.c"/>
   </Watches>
  </Watch1>
@@ -66,9 +65,7 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="99" useTextEdit="1" path="../Core/Src/main.c" left="0" top="0" codecName="UTF-8"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="27" y="65" useTextEdit="1" path="../User/other/src/i2c_slave.c" left="0" selected="1" top="0" codecName="UTF-8"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="70" useTextEdit="1" path="../User/other/src/i2c_protocol.c" left="0" top="39" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="13" y="28" useTextEdit="1" path="../User/task_event/app/src/task_main.c" left="0" selected="1" top="0" codecName="UTF-8"/>
  </Files>
- <EMStudioWindow activeProject="stm32f3" fileDialogDefaultFilter="*.c" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="C:/Users/skb97/Desktop/stm32f3discovery_demo/User/other/src" debugSearchPath="" autoConnectCapabilities="1343"/>
+ <EMStudioWindow activeProject="stm32f3" fileDialogDefaultFilter="*" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="D:/work/stm32f3discovery_demo/User/other/src" debugSearchPath="" autoConnectCapabilities="1343"/>
 </session>

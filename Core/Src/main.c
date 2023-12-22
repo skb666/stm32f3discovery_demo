@@ -29,10 +29,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "task.h"
 #include "device.h"
-#include "param.h"
 #include "i2c_slave.h"
+#include "param.h"
+#include "task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -91,7 +91,7 @@ void USB_Reset(void)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t ch;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -124,10 +124,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
   uart_config(DEV_USART1);
   uart_config(DEV_USART3);
+  i2c_slave_config();
   LL_mDelay(800);
   sys_param_init();
   task_init();
-  i2c_slave_config();
   /* USER CODE END 2 */
 
   /* Infinite loop */

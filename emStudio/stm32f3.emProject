@@ -151,6 +151,7 @@
         <file file_name="../User/other/src/device.c" />
         <file file_name="../User/other/src/i2c_control.c" />
         <file file_name="../User/other/src/i2c_protocol.c" />
+        <file file_name="../User/other/src/i2c_reg_list.c" />
         <file file_name="../User/other/src/i2c_slave.c" />
         <file file_name="../User/other/src/led_control.c" />
         <file file_name="../User/other/src/mycmd.c" />

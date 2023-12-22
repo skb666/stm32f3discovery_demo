@@ -1,8 +1,10 @@
 #include "i2c_slave.h"
 
+#include <stdlib.h>
+
 #include "common.h"
-#include "device.h"
 #include "i2c_protocol.h"
+#include "i2c_reg_list.h"
 #include "main.h"
 #include "ring_fifo.h"
 
@@ -30,6 +32,46 @@ static uint8_t __i2c_rx_ring_data[I2C_RX_RING_SIZE];
 static uint8_t __i2c_tx_ring_data[I2C_TX_RING_SIZE];
 
 _CCM_DATA static i2c_device_t i2c_dev;
+
+static int reg_addr_cmp(const void *reg_a, const void *reg_b) {
+  if (((REG_T *)reg_a)->addr > ((REG_T *)reg_b)->addr) {
+    return 1;
+  } else if (((REG_T *)reg_a)->addr < ((REG_T *)reg_b)->addr) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
+static int reg_find_cmp(const void *addr, const void *reg) {
+  if (*(uint16_t *)addr > ((REG_T *)reg)->addr) {
+    return 1;
+  } else if (*(uint16_t *)addr < ((REG_T *)reg)->addr) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
+static void reg_list_init(void) {
+  REG_T *reg_list;
+  uint32_t list_size;
+
+  reg_list = reg_list_get(&list_size);
+
+  qsort(reg_list, list_size, sizeof(REG_T), reg_addr_cmp);
+}
+
+static REG_T *reg_addr_find(uint16_t addr) {
+  REG_T *reg, *reg_list;
+  uint32_t list_size;
+
+  reg_list = reg_list_get(&list_size);
+
+  reg = bsearch(&addr, reg_list, list_size, sizeof(REG_T), reg_find_cmp);
+
+  return reg;
+}
 
 void i2c_slave_config(void) {
   LL_I2C_Disable(I2C1);
@@ -63,7 +105,7 @@ void i2c_slave_config(void) {
       .size = 0,
   };
 
-  // TODO: 对 reg_list 进行初始化
+  reg_list_init();
 }
 
 uint16_t i2c_tx_get(uint8_t *buf, uint16_t size) {
@@ -167,18 +209,15 @@ static void i2c_reception_cb(void) {
 }
 
 static void i2c_prepare_data(void) {
-  REG_T *reg_list;
-  uint32_t list_size;
+  REG_T *reg;
 
-  // TODO: 二分查找优化
-  reg_list = reg_list_get(&list_size);
-  for (uint32_t i = 0; i < list_size; ++i) {
-    if (reg_list[i].addr == i2c_dev.reg_addr) {
-      if (reg_list[i].read_cb) {
-        reg_list[i].read_cb();
-        break;
-      }
-    }
+  reg = reg_addr_find(i2c_dev.reg_addr);
+  if (!reg) {
+    return;
+  }
+
+  if (reg->read_cb) {
+    reg->read_cb();
   }
 }
 
@@ -193,19 +232,16 @@ static void i2c_transmit_cb(void) {
 }
 
 static void i2c_complete_cb(void) {
-  REG_T *reg_list;
-  uint32_t list_size;
+  REG_T *reg;
 
   if (i2c_rx_size()) {
-    // TODO: 二分查找优化
-    reg_list = reg_list_get(&list_size);
-    for (uint32_t i = 0; i < list_size; ++i) {
-      if (reg_list[i].addr == i2c_dev.reg_addr) {
-        if ((reg_list[i].attrib != REG_RO) && reg_list[i].write_cb) {
-          reg_list[i].write_cb();
-          break;
-        }
-      }
+    reg = reg_addr_find(i2c_dev.reg_addr);
+    if (!reg) {
+      return;
+    }
+
+    if ((reg->attrib != REG_RO) && reg->write_cb) {
+      reg->write_cb();
     }
   }
 

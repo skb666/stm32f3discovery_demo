@@ -7,19 +7,12 @@
 extern "C" {
 #endif
 
-typedef enum {
-  REG_RO = 0,
-  REG_RW,
-} REG_ATTRIB;
+/* register read callback */
+void reg_read_cb_version(void);
+void reg_read_cb_led(void);
 
-typedef struct {
-  uint16_t addr;
-  REG_ATTRIB attrib;
-  void (*read_cb)(void);
-  void (*write_cb)(void);
-} REG_T;
-
-void *reg_list_get(uint32_t *num);
+/* register write callback */
+void reg_write_cb_led(void);
 
 #ifdef __cplusplus
 }
