@@ -3,6 +3,25 @@
 
 #include <stdint.h>
 
+#define I2C_SLAVE_ADDRESS (0x33 << 1)
+
+#define I2C_RX_RING_SIZE 1280
+#define I2C_TX_RING_SIZE 16
+
+#ifndef REG_ADDR_SIZE
+#define REG_ADDR_SIZE 2
+#endif
+
+#if (REG_ADDR_SIZE == 1)
+#define REG_ADDR_TYPE uint8_t
+#elif (REG_ADDR_SIZE == 2)
+#define REG_ADDR_TYPE uint16_t
+#elif (NUM_BITS == 4)
+#define REG_ADDR_TYPE uint32_t
+#elif (NUM_BITS == 8)
+#define REG_ADDR_TYPE uint64_t
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -13,7 +32,7 @@ typedef enum {
 } REG_ATTRIB;
 
 typedef struct {
-  uint16_t addr;
+  REG_ADDR_TYPE addr;
   REG_ATTRIB attrib;
   void (*read_cb)(void);
   void (*write_cb)(void);

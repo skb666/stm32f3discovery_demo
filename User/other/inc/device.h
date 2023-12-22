@@ -5,6 +5,16 @@
 #include <stdio.h>
 #include <string.h>
 
+#define UART_RX_RING_SIZE 1280
+#define UART_TX_RING_SIZE 1280
+#define UART_DMARX_BUF_SIZE 256
+#define UART_DMATX_BUF_SIZE 256
+
+#define FRAME_DATA_LEN_MAX 1280
+#define FRAME_HEAD1 0x55
+#define FRAME_HEAD2 0xAA
+#define FUNC_LIST_MAX 254
+
 #ifdef __cplusplus
 extern "C" {
 #endif

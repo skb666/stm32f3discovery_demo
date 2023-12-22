@@ -4,16 +4,6 @@
 #include "main.h"
 #include "ring_fifo.h"
 
-#define UART_RX_RING_SIZE 1280
-#define UART_TX_RING_SIZE 1280
-#define UART_DMARX_BUF_SIZE 256
-#define UART_DMATX_BUF_SIZE 256
-
-#define FRAME_DATA_LEN_MAX 1280
-#define FRAME_HEAD1 0x55
-#define FRAME_HEAD2 0xAA
-#define FUNC_LIST_MAX 254
-
 typedef enum {
   PARSE_STAT_HEAD1 = 0,
   PARSE_STAT_HEAD2,

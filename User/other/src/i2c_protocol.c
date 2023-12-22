@@ -42,7 +42,7 @@ void reg_write_cb_led(void) {
   LED_CTRL *leds = &sys->ctrl.leds;
   uint16_t value;
 
-  if (!i2c_rx_size()) {
+  if (i2c_rx_size() < sizeof(uint16_t)) {
     return;
   }
 

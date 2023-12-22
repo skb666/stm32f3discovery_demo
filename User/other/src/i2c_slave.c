@@ -8,13 +8,6 @@
 #include "main.h"
 #include "ring_fifo.h"
 
-#define I2C_SLAVE_ADDRESS (0x33 << 1)
-
-#define REG_ADDR_SIZE_DEFAULT 2
-
-#define I2C_RX_RING_SIZE 1280
-#define I2C_TX_RING_SIZE 16
-
 typedef enum {
   I2C_STATUS_REG = 0,
   I2C_STATUS_DATA,
@@ -23,7 +16,7 @@ typedef enum {
 typedef struct {
   I2C_SLAVE_STATUS status;
   uint16_t reg_addr_size;
-  uint16_t reg_addr;
+  REG_ADDR_TYPE reg_addr;
   RING_FIFO rx_ring;
   RING_FIFO tx_ring;
 } i2c_device_t;
@@ -44,9 +37,9 @@ static int reg_addr_cmp(const void *reg_a, const void *reg_b) {
 }
 
 static int reg_find_cmp(const void *addr, const void *reg) {
-  if (*(uint16_t *)addr > ((REG_T *)reg)->addr) {
+  if (*(REG_ADDR_TYPE *)addr > ((REG_T *)reg)->addr) {
     return 1;
-  } else if (*(uint16_t *)addr < ((REG_T *)reg)->addr) {
+  } else if (*(REG_ADDR_TYPE *)addr < ((REG_T *)reg)->addr) {
     return -1;
   } else {
     return 0;
@@ -62,7 +55,7 @@ static void reg_list_init(void) {
   qsort(reg_list, list_size, sizeof(REG_T), reg_addr_cmp);
 }
 
-static REG_T *reg_addr_find(uint16_t addr) {
+static REG_T *reg_addr_find(REG_ADDR_TYPE addr) {
   REG_T *reg, *reg_list;
   uint32_t list_size;
 
@@ -85,7 +78,7 @@ void i2c_slave_config(void) {
   LL_I2C_EnableIT_STOP(I2C1);
 
   /* INIT */
-  i2c_dev.reg_addr_size = REG_ADDR_SIZE_DEFAULT;
+  i2c_dev.reg_addr_size = REG_ADDR_SIZE;
   i2c_dev.rx_ring = (RING_FIFO){
       .buffer = __i2c_rx_ring_data,
       .capacity = I2C_RX_RING_SIZE,
