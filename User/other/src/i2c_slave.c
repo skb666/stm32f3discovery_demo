@@ -67,15 +67,15 @@ static REG_T *reg_addr_find(REG_ADDR_TYPE addr) {
 }
 
 void i2c_slave_config(void) {
-  LL_I2C_Disable(I2C1);
-  LL_I2C_SetOwnAddress1(I2C1, I2C_SLAVE_ADDRESS, LL_I2C_OWNADDRESS1_7BIT);
-  LL_I2C_EnableOwnAddress1(I2C1);
-  LL_I2C_Enable(I2C1);
+  LL_I2C_Disable(I2C_TYPE);
+  LL_I2C_SetOwnAddress1(I2C_TYPE, I2C_SLAVE_ADDRESS, LL_I2C_OWNADDRESS1_7BIT);
+  LL_I2C_EnableOwnAddress1(I2C_TYPE);
+  LL_I2C_Enable(I2C_TYPE);
 
-  LL_I2C_EnableIT_ADDR(I2C1);
-  LL_I2C_EnableIT_NACK(I2C1);
-  LL_I2C_EnableIT_ERR(I2C1);
-  LL_I2C_EnableIT_STOP(I2C1);
+  LL_I2C_EnableIT_ADDR(I2C_TYPE);
+  LL_I2C_EnableIT_NACK(I2C_TYPE);
+  LL_I2C_EnableIT_ERR(I2C_TYPE);
+  LL_I2C_EnableIT_STOP(I2C_TYPE);
 
   /* INIT */
   i2c_dev.reg_addr_size = REG_ADDR_SIZE;
@@ -185,7 +185,7 @@ static void i2c_dev_reset(void) {
 static void i2c_reception_cb(void) {
   uint8_t data;
 
-  data = LL_I2C_ReceiveData8(I2C1);
+  data = LL_I2C_ReceiveData8(I2C_TYPE);
   i2c_rx_put(&data, 1);
 
   if (i2c_dev.status == I2C_STATUS_REG) {
@@ -218,9 +218,9 @@ static void i2c_transmit_cb(void) {
   uint8_t data;
 
   if (i2c_tx_get(&data, 1)) {
-    LL_I2C_TransmitData8(I2C1, data);
+    LL_I2C_TransmitData8(I2C_TYPE, data);
   } else {
-    LL_I2C_TransmitData8(I2C1, 0);
+    LL_I2C_TransmitData8(I2C_TYPE, 0);
   }
 }
 
@@ -243,64 +243,64 @@ static void i2c_complete_cb(void) {
 
 void i2c_ev_isr(void) {
   /* Check ADDR flag value in ISR register */
-  if (LL_I2C_IsActiveFlag_ADDR(I2C1)) {
+  if (LL_I2C_IsActiveFlag_ADDR(I2C_TYPE)) {
     /* Verify the Address Match with the OWN Slave address */
-    if (LL_I2C_GetAddressMatchCode(I2C1) == I2C_SLAVE_ADDRESS) {
+    if (LL_I2C_GetAddressMatchCode(I2C_TYPE) == I2C_SLAVE_ADDRESS) {
       /* Verify the transfer direction, a write direction, Slave enters receiver mode */
-      if (LL_I2C_GetTransferDirection(I2C1) == LL_I2C_DIRECTION_WRITE) {
+      if (LL_I2C_GetTransferDirection(I2C_TYPE) == LL_I2C_DIRECTION_WRITE) {
         /* Clear ADDR flag value in ISR register */
-        LL_I2C_ClearFlag_ADDR(I2C1);
+        LL_I2C_ClearFlag_ADDR(I2C_TYPE);
 
         /* Enable Receive Interrupt */
-        LL_I2C_EnableIT_RX(I2C1);
-      } else if (LL_I2C_GetTransferDirection(I2C1) == LL_I2C_DIRECTION_READ) {
+        LL_I2C_EnableIT_RX(I2C_TYPE);
+      } else if (LL_I2C_GetTransferDirection(I2C_TYPE) == LL_I2C_DIRECTION_READ) {
         /* Clear ADDR flag value in ISR register */
-        LL_I2C_ClearFlag_ADDR(I2C1);
+        LL_I2C_ClearFlag_ADDR(I2C_TYPE);
 
         i2c_prepare_data();
 
         /* Enable Transmit Interrupt */
-        LL_I2C_EnableIT_TX(I2C1);
+        LL_I2C_EnableIT_TX(I2C_TYPE);
       }
     } else {
       /* Clear ADDR flag value in ISR register */
-      LL_I2C_ClearFlag_ADDR(I2C1);
+      LL_I2C_ClearFlag_ADDR(I2C_TYPE);
 
       /* Call Error function */
       Error_Handler();
     }
   }
   /* Check NACK flag value in ISR register */
-  else if (LL_I2C_IsActiveFlag_NACK(I2C1)) {
+  else if (LL_I2C_IsActiveFlag_NACK(I2C_TYPE)) {
     /* End of Transfer */
-    LL_I2C_ClearFlag_NACK(I2C1);
+    LL_I2C_ClearFlag_NACK(I2C_TYPE);
   }
   /* Check RXNE flag value in ISR register */
-  else if (LL_I2C_IsActiveFlag_RXNE(I2C1)) {
+  else if (LL_I2C_IsActiveFlag_RXNE(I2C_TYPE)) {
     /* Call function Slave Reception Callback */
     i2c_reception_cb();
   }
   /* Check TXIS flag value in ISR register */
-  else if (LL_I2C_IsActiveFlag_TXIS(I2C1)) {
+  else if (LL_I2C_IsActiveFlag_TXIS(I2C_TYPE)) {
     /* Call function Slave Ready to Transmit Callback */
     i2c_transmit_cb();
   }
   /* Check STOP flag value in ISR register */
-  else if (LL_I2C_IsActiveFlag_STOP(I2C1)) {
+  else if (LL_I2C_IsActiveFlag_STOP(I2C_TYPE)) {
     /* End of Transfer */
-    LL_I2C_ClearFlag_STOP(I2C1);
+    LL_I2C_ClearFlag_STOP(I2C_TYPE);
 
     /* Check TXE flag value in ISR register */
-    if (!LL_I2C_IsActiveFlag_TXE(I2C1)) {
+    if (!LL_I2C_IsActiveFlag_TXE(I2C_TYPE)) {
       /* Flush TX buffer */
-      LL_I2C_ClearFlag_TXE(I2C1);
+      LL_I2C_ClearFlag_TXE(I2C_TYPE);
     }
 
     /* Call function Slave Complete Callback */
     i2c_complete_cb();
   }
   /* Check TXE flag value in ISR register */
-  else if (!LL_I2C_IsActiveFlag_TXE(I2C1)) {
+  else if (!LL_I2C_IsActiveFlag_TXE(I2C_TYPE)) {
     /* Do nothing */
     /* This Flag will be set by hardware when the TXDR register is empty */
     /* If needed, use LL_I2C_ClearFlag_TXE() interface to flush the TXDR register  */

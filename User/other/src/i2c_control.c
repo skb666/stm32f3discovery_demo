@@ -29,7 +29,7 @@ int shell_i2cdetect_cmd(int argc, char *argv[]) {
         xcmd_print("   ");
         continue;
       }
-      res = HAL_I2C_IsDeviceReady(&hi2c2, addr << 1, 2, 2);
+      res = HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 2);
       if (res == HAL_OK) {
         xcmd_print(" %02hx", addr);
       } else {
@@ -40,16 +40,30 @@ int shell_i2cdetect_cmd(int argc, char *argv[]) {
   }
 
   uint8_t test[] = {0x00, 0x01, 0x00, 0xdd};
-  HAL_I2C_Master_Transmit_IT(&hi2c2, 0x33 << 1, test, sizeof(test));
-  while (HAL_I2C_GetState(&hi2c2) != HAL_I2C_STATE_READY) {
-  }
 
-  HAL_I2C_Master_Transmit_IT(&hi2c2, 0x33 << 1, i2c_tx_buf, sizeof(i2c_tx_buf));
-  while (HAL_I2C_GetState(&hi2c2) != HAL_I2C_STATE_READY) {
-  }
-  HAL_I2C_Master_Receive_IT(&hi2c2, 0x33 << 1, i2c_rx_buf, sizeof(i2c_rx_buf));
-  while (HAL_I2C_GetState(&hi2c2) != HAL_I2C_STATE_READY) {
-  }
+  do {
+    if (HAL_I2C_Master_Transmit_DMA(&hi2c1, 0x33 << 1, test, sizeof(test)) != HAL_OK) {
+      Error_Handler();
+    }
+    while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {
+    }
+  } while (HAL_I2C_GetError(&hi2c1) == HAL_I2C_ERROR_AF);
+
+  do {
+    if (HAL_I2C_Master_Transmit_DMA(&hi2c1, 0x33 << 1, i2c_tx_buf, sizeof(i2c_tx_buf)) != HAL_OK) {
+      Error_Handler();
+    }
+    while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {
+    }
+  } while (HAL_I2C_GetError(&hi2c1) == HAL_I2C_ERROR_AF);
+
+  do {
+    if (HAL_I2C_Master_Receive_DMA(&hi2c1, 0x33 << 1, i2c_rx_buf, sizeof(i2c_rx_buf)) != HAL_OK) {
+      Error_Handler();
+    }
+    while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {
+    }
+  } while (HAL_I2C_GetError(&hi2c1) == HAL_I2C_ERROR_AF);
 
   for (size_t i = 0; i < sizeof(i2c_rx_buf); ++i) {
     printf("0x%02x ", i2c_rx_buf[i]);

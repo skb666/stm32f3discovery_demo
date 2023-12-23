@@ -106,7 +106,9 @@ static void (*usb_monitor(DEV_TYPE dev_type))(uint8_t *, uint16_t) {
 
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
-extern I2C_HandleTypeDef hi2c2;
+extern DMA_HandleTypeDef hdma_i2c1_rx;
+extern DMA_HandleTypeDef hdma_i2c1_tx;
+extern I2C_HandleTypeDef hi2c1;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -326,6 +328,34 @@ void DMA1_Channel5_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles DMA1 channel6 global interrupt.
+  */
+void DMA1_Channel6_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel6_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel6_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_i2c1_tx);
+  /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel6_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 channel7 global interrupt.
+  */
+void DMA1_Channel7_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_i2c1_rx);
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 1 */
+}
+
+/**
   * @brief This function handles I2C1 event global interrupt / I2C1 wake-up interrupt through EXTI line 23.
   */
 void I2C1_EV_IRQHandler(void)
@@ -333,10 +363,24 @@ void I2C1_EV_IRQHandler(void)
   /* USER CODE BEGIN I2C1_EV_IRQn 0 */
 
   /* USER CODE END I2C1_EV_IRQn 0 */
-
+  HAL_I2C_EV_IRQHandler(&hi2c1);
   /* USER CODE BEGIN I2C1_EV_IRQn 1 */
-  i2c_ev_isr();
+
   /* USER CODE END I2C1_EV_IRQn 1 */
+}
+
+/**
+  * @brief This function handles I2C1 error interrupt.
+  */
+void I2C1_ER_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C1_ER_IRQn 0 */
+
+  /* USER CODE END I2C1_ER_IRQn 0 */
+  HAL_I2C_ER_IRQHandler(&hi2c1);
+  /* USER CODE BEGIN I2C1_ER_IRQn 1 */
+
+  /* USER CODE END I2C1_ER_IRQn 1 */
 }
 
 /**
@@ -347,10 +391,24 @@ void I2C2_EV_IRQHandler(void)
   /* USER CODE BEGIN I2C2_EV_IRQn 0 */
 
   /* USER CODE END I2C2_EV_IRQn 0 */
-  HAL_I2C_EV_IRQHandler(&hi2c2);
-  /* USER CODE BEGIN I2C2_EV_IRQn 1 */
 
+  /* USER CODE BEGIN I2C2_EV_IRQn 1 */
+  i2c_ev_isr();
   /* USER CODE END I2C2_EV_IRQn 1 */
+}
+
+/**
+  * @brief This function handles I2C2 error interrupt.
+  */
+void I2C2_ER_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C2_ER_IRQn 0 */
+
+  /* USER CODE END I2C2_ER_IRQn 0 */
+
+  /* USER CODE BEGIN I2C2_ER_IRQn 1 */
+
+  /* USER CODE END I2C2_ER_IRQn 1 */
 }
 
 /**

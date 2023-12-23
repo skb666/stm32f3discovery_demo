@@ -65,7 +65,7 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="13" y="28" useTextEdit="1" path="../User/task_event/app/src/task_main.c" left="0" selected="1" top="0" codecName="UTF-8"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="99" useTextEdit="1" path="../Core/Src/main.c" left="0" selected="1" top="69" codecName="UTF-8"/>
  </Files>
  <EMStudioWindow activeProject="stm32f3" fileDialogDefaultFilter="*" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="D:/work/stm32f3discovery_demo/User/other/src" debugSearchPath="" autoConnectCapabilities="1343"/>
 </session>
