@@ -112,8 +112,11 @@ int shell_i2ctransfer_cmd(int argc, char *argv[]) {
   if (operate == I2C_READ) { /* 读数据 */
     i2c_master_read(dev_addr, i2c_buf, i2c_buf_size);
 
-    for (uint16_t i = 0; i < i2c_buf_size; ++i) {
-      xcmd_print("0x%02hhx ", i2c_buf[i]);
+    for (uint16_t i = 1; i <= i2c_buf_size; ++i) {
+      xcmd_print("0x%02hhx ", i2c_buf[i - 1]);
+      if (i % 16 == 0) {
+        xcmd_print("\r\n");
+      }
     }
     xcmd_print("\r\n");
   } else if (operate == I2C_WRITE) { /* 写数据 */
@@ -159,8 +162,11 @@ int shell_i2ctransfer_cmd(int argc, char *argv[]) {
     if (operate == I2C_READ) { /* 读数据 */
       i2c_master_read(dev_addr, i2c_buf, i2c_buf_size);
 
-      for (uint16_t i = 0; i < i2c_buf_size; ++i) {
-        xcmd_print("0x%02hhx ", i2c_buf[i]);
+      for (uint16_t i = 1; i <= i2c_buf_size; ++i) {
+        xcmd_print("0x%02hhx ", i2c_buf[i - 1]);
+        if (i % 16 == 0) {
+          xcmd_print("\r\n");
+        }
       }
       xcmd_print("\r\n");
     } else if (operate == I2C_WRITE) { /* 写数据 */

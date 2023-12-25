@@ -37,7 +37,7 @@
 /* Private variables ---------------------------------------------------------*/
 static char tx_buffer[APP_TX_DATA_SIZE];
 ring_define_static(_CCM_DATA uint8_t, usb_rx_buffer, APP_RX_DATA_SIZE, 1);
-ring_define_static(_CCM_DATA uint8_t, usb_tx_buffer, APP_TX_DATA_SIZE, 1);
+ring_define_static(_CCM_DATA uint8_t, usb_tx_buffer, APP_TX_DATA_SIZE, 0);
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -403,31 +403,73 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 }
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
+void usb_tx_trans(void)
+{
+  NUM_TYPE length = 0;
+
+  if (!ring_is_empty(&usb_tx_buffer))
+  {
+    length = ring_size(&usb_tx_buffer);
+
+    disable_global_irq();
+    ring_pop_mult(&usb_tx_buffer, UserTxBufferFS, length);
+    enable_global_irq();
+
+    CDC_Transmit_FS(UserTxBufferFS, length);
+  }
+}
+
 void usb_printf(const char *format, ...)
 {
   va_list args;
   uint32_t length;
+  uint16_t success = 0;
 
   va_start(args, format);
   length = vsnprintf(tx_buffer, APP_TX_DATA_SIZE, (char *)format, args);
   va_end(args);
   
-  disable_global_irq();
-  ring_push_mult(&usb_tx_buffer, tx_buffer, length);
-  enable_global_irq();
+  do {
+    disable_global_irq();
+    success = ring_push_mult(&usb_tx_buffer, tx_buffer, length);
+    enable_global_irq();
+
+    if (success == length) {
+      return;
+    }
+
+    usb_tx_trans();
+    length -= success;
+  } while (length);
 }
 
 void usb_puts(uint8_t* buf, uint16_t len)
 {
-  disable_global_irq();
-  ring_push_mult(&usb_tx_buffer, buf, len);
-  enable_global_irq();
+  uint16_t success = 0;
+
+  do {
+    disable_global_irq();
+    success = ring_push_mult(&usb_tx_buffer, buf, len);
+    enable_global_irq();
+
+    if (success == len) {
+      return;
+    }
+
+    usb_tx_trans();
+    len -= success;
+  } while (len);
 }
 
 void usb_putchar(const char ch)
 {
+
   tx_buffer[0] = ch;
 
+  if (ring_is_full(&usb_tx_buffer)) {
+    usb_tx_trans();
+  }
+  
   disable_global_irq();
   ring_push(&usb_tx_buffer, tx_buffer);
   enable_global_irq();
@@ -447,22 +489,6 @@ int8_t usb_rx_get(uint8_t *ch)
   enable_global_irq();
 
   return res;
-}
-
-void usb_tx_trans(void)
-{
-  NUM_TYPE length = 0;
-
-  if (!ring_is_empty(&usb_tx_buffer))
-  {
-    length = ring_size(&usb_tx_buffer);
-
-    disable_global_irq();
-    ring_pop_mult(&usb_tx_buffer, UserTxBufferFS, length);
-    enable_global_irq();
-
-    CDC_Transmit_FS(UserTxBufferFS, length);
-  }
 }
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
