@@ -6,8 +6,37 @@
 #include "main.h"
 #include "xcmd.h"
 
-uint8_t i2c_tx_buf[2] = {0x00, 0x00};
-uint8_t i2c_rx_buf[2];
+#define I2C_MASTER_HANDLE &hi2c1
+
+typedef enum {
+  I2C_READ = 0,
+  I2C_WRITE,
+} I2C_OPERATE;
+
+static uint8_t i2c_buf[1280];
+static uint16_t i2c_buf_size = 0;
+
+static inline void i2c_master_write(uint16_t DevAddress, uint8_t *pData, uint16_t Size) {
+  do {
+    if (HAL_I2C_Master_Transmit_DMA(I2C_MASTER_HANDLE, (DevAddress << 1), pData, Size) != HAL_OK) {
+      xcmd_print("write error: %u\r\n", HAL_I2C_GetError(I2C_MASTER_HANDLE));
+      return;
+    }
+    while (HAL_I2C_GetState(I2C_MASTER_HANDLE) != HAL_I2C_STATE_READY) {
+    }
+  } while (HAL_I2C_GetError(I2C_MASTER_HANDLE) == HAL_I2C_ERROR_AF);
+}
+
+static inline void i2c_master_read(uint16_t DevAddress, uint8_t *pData, uint16_t Size) {
+  do {
+    if (HAL_I2C_Master_Receive_DMA(I2C_MASTER_HANDLE, (DevAddress << 1), pData, Size) != HAL_OK) {
+      xcmd_print("read error: %u\r\n", HAL_I2C_GetError(I2C_MASTER_HANDLE));
+      return;
+    }
+    while (HAL_I2C_GetState(I2C_MASTER_HANDLE) != HAL_I2C_STATE_READY) {
+    }
+  } while (HAL_I2C_GetError(I2C_MASTER_HANDLE) == HAL_I2C_ERROR_AF);
+}
 
 int shell_i2cdetect_cmd(int argc, char *argv[]) {
   HAL_StatusTypeDef res;
@@ -29,7 +58,7 @@ int shell_i2cdetect_cmd(int argc, char *argv[]) {
         xcmd_print("   ");
         continue;
       }
-      res = HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 2);
+      res = HAL_I2C_IsDeviceReady(I2C_MASTER_HANDLE, addr << 1, 2, 2);
       if (res == HAL_OK) {
         xcmd_print(" %02hx", addr);
       } else {
@@ -39,36 +68,115 @@ int shell_i2cdetect_cmd(int argc, char *argv[]) {
     xcmd_print("\r\n");
   }
 
-  uint8_t test[] = {0x00, 0x01, 0x00, 0xdd};
+  return 0;
+}
 
-  do {
-    if (HAL_I2C_Master_Transmit_DMA(&hi2c1, 0x33 << 1, test, sizeof(test)) != HAL_OK) {
-      Error_Handler();
-    }
-    while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {
-    }
-  } while (HAL_I2C_GetError(&hi2c1) == HAL_I2C_ERROR_AF);
+int shell_i2ctransfer_cmd(int argc, char *argv[]) {
+  int index = 1;
+  uint16_t dev_addr;
+  I2C_OPERATE operate;
+  int ret;
+  uint16_t data;
 
-  do {
-    if (HAL_I2C_Master_Transmit_DMA(&hi2c1, 0x33 << 1, i2c_tx_buf, sizeof(i2c_tx_buf)) != HAL_OK) {
-      Error_Handler();
-    }
-    while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {
-    }
-  } while (HAL_I2C_GetError(&hi2c1) == HAL_I2C_ERROR_AF);
-
-  do {
-    if (HAL_I2C_Master_Receive_DMA(&hi2c1, 0x33 << 1, i2c_rx_buf, sizeof(i2c_rx_buf)) != HAL_OK) {
-      Error_Handler();
-    }
-    while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {
-    }
-  } while (HAL_I2C_GetError(&hi2c1) == HAL_I2C_ERROR_AF);
-
-  for (size_t i = 0; i < sizeof(i2c_rx_buf); ++i) {
-    printf("0x%02x ", i2c_rx_buf[i]);
+  if (argc < 2) {
+    xcmd_print("i2ctransfer need more arguments!\r\n");
+    return 0;
   }
-  printf("\r\n");
+
+  /* 获取操作方式 */
+  if (argv[index][0] == 'r') {
+    operate = I2C_READ;
+  } else if (argv[index][0] == 'w') {
+    operate = I2C_WRITE;
+  } else {
+    xcmd_print("param error!\r\n");
+    return 0;
+  }
+
+  /* 获取读写数据的数量、从机地址 */
+  ret = sscanf(&argv[index][1], "%hu@%hx", &data, &dev_addr);
+  if (ret != 2) {
+    xcmd_print("param error!\r\n");
+    return 0;
+  }
+
+  /* 判断从机是否存在 */
+  if (HAL_I2C_IsDeviceReady(I2C_MASTER_HANDLE, (dev_addr << 1), 2, 2) != HAL_OK) {
+    xcmd_print("the i2c slave does not exist\r\n");
+    return 0;
+  }
+
+  index += 1;
+  i2c_buf_size = data;
+
+  if (operate == I2C_READ) { /* 读数据 */
+    i2c_master_read(dev_addr, i2c_buf, i2c_buf_size);
+
+    for (uint16_t i = 0; i < i2c_buf_size; ++i) {
+      xcmd_print("0x%02hhx ", i2c_buf[i]);
+    }
+    xcmd_print("\r\n");
+  } else if (operate == I2C_WRITE) { /* 写数据 */
+    for (uint16_t i = 0; i < i2c_buf_size; ++i) {
+      ret = sscanf(argv[index], "%hx", &data);
+      if (ret < 1) {
+        xcmd_print("missing param!\r\n");
+        return 0;
+      }
+      i2c_buf[i] = data;
+      index += 1;
+    }
+
+    i2c_master_write(dev_addr, i2c_buf, i2c_buf_size);
+  }
+
+  if (argc <= index) {
+    return 0;
+  }
+
+  /* 根据参数进行后续读写操作 */
+  while (index < argc) {
+    /* 获取操作方式 */
+    if (argv[index][0] == 'r') {
+      operate = I2C_READ;
+    } else if (argv[index][0] == 'w') {
+      operate = I2C_WRITE;
+    } else {
+      xcmd_print("param error!\r\n");
+      return 0;
+    }
+
+    /* 获取读写数据的数量 */
+    ret = sscanf(&argv[index][1], "%hu", &data);
+    if (ret != 1) {
+      xcmd_print("param error!\r\n");
+      return 0;
+    }
+
+    index += 1;
+    i2c_buf_size = data;
+
+    if (operate == I2C_READ) { /* 读数据 */
+      i2c_master_read(dev_addr, i2c_buf, i2c_buf_size);
+
+      for (uint16_t i = 0; i < i2c_buf_size; ++i) {
+        xcmd_print("0x%02hhx ", i2c_buf[i]);
+      }
+      xcmd_print("\r\n");
+    } else if (operate == I2C_WRITE) { /* 写数据 */
+      for (uint16_t i = 0; i < i2c_buf_size; ++i) {
+        ret = sscanf(argv[index], "%hx", &data);
+        if (ret < 1) {
+          xcmd_print("missing param!\r\n");
+          return 0;
+        }
+        i2c_buf[i] = data;
+        index += 1;
+      }
+
+      i2c_master_write(dev_addr, i2c_buf, i2c_buf_size);
+    }
+  }
 
   return 0;
 }

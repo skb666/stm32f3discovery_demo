@@ -15,7 +15,7 @@ extern "C" {
 
 #include "xcmd_confg.h"
 
-#define VERSION "1.1.0"
+#define VERSION "1.1.1"
 
 #ifndef XCMD_LINE_MAX_LENGTH
 #define XCMD_LINE_MAX_LENGTH (64) /* 命令行支持的最大字符数 */

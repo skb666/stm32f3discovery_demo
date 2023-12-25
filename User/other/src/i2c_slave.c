@@ -101,7 +101,7 @@ void i2c_slave_config(void) {
   reg_list_init();
 }
 
-uint16_t i2c_tx_get(uint8_t *buf, uint16_t size) {
+uint16_t i2c_slave_tx_get(uint8_t *buf, uint16_t size) {
   uint16_t ok = 0;
 
   if (buf == NULL) {
@@ -119,7 +119,7 @@ uint16_t i2c_tx_get(uint8_t *buf, uint16_t size) {
   return ok;
 }
 
-uint16_t i2c_tx_put(const uint8_t *buf, uint16_t size) {
+uint16_t i2c_slave_tx_put(const uint8_t *buf, uint16_t size) {
   uint16_t ok = 0;
 
   if (buf == NULL) {
@@ -133,7 +133,7 @@ uint16_t i2c_tx_put(const uint8_t *buf, uint16_t size) {
   return ok;
 }
 
-uint16_t i2c_rx_get(uint8_t *buf, uint16_t size) {
+uint16_t i2c_slave_rx_get(uint8_t *buf, uint16_t size) {
   uint16_t ok = 0;
 
   if (buf == NULL) {
@@ -151,7 +151,7 @@ uint16_t i2c_rx_get(uint8_t *buf, uint16_t size) {
   return ok;
 }
 
-uint16_t i2c_rx_put(const uint8_t *buf, uint16_t size) {
+uint16_t i2c_slave_rx_put(const uint8_t *buf, uint16_t size) {
   uint16_t ok = 0;
 
   if (buf == NULL) {
@@ -165,11 +165,11 @@ uint16_t i2c_rx_put(const uint8_t *buf, uint16_t size) {
   return ok;
 }
 
-uint16_t i2c_tx_size(void) {
+uint16_t i2c_slave_tx_size(void) {
   return ring_size(&i2c_dev.tx_ring);
 }
 
-uint16_t i2c_rx_size(void) {
+uint16_t i2c_slave_rx_size(void) {
   return ring_size(&i2c_dev.rx_ring);
 }
 
@@ -186,13 +186,13 @@ static void i2c_reception_cb(void) {
   uint8_t data;
 
   data = LL_I2C_ReceiveData8(I2C_TYPE);
-  i2c_rx_put(&data, 1);
+  i2c_slave_rx_put(&data, 1);
 
   if (i2c_dev.status == I2C_STATUS_REG) {
-    if (i2c_rx_size() >= i2c_dev.reg_addr_size) {
+    if (i2c_slave_rx_size() >= i2c_dev.reg_addr_size) {
       i2c_dev.reg_addr = 0;
       for (uint16_t i = 0; i < i2c_dev.reg_addr_size; ++i) {
-        i2c_rx_get(&data, 1);
+        i2c_slave_rx_get(&data, 1);
         i2c_dev.reg_addr <<= 8;
         i2c_dev.reg_addr |= data;
       }
@@ -217,7 +217,7 @@ static void i2c_prepare_data(void) {
 static void i2c_transmit_cb(void) {
   uint8_t data;
 
-  if (i2c_tx_get(&data, 1)) {
+  if (i2c_slave_tx_get(&data, 1)) {
     LL_I2C_TransmitData8(I2C_TYPE, data);
   } else {
     LL_I2C_TransmitData8(I2C_TYPE, 0);
@@ -227,7 +227,7 @@ static void i2c_transmit_cb(void) {
 static void i2c_complete_cb(void) {
   REG_T *reg;
 
-  if (i2c_rx_size()) {
+  if (i2c_slave_rx_size()) {
     reg = reg_addr_find(i2c_dev.reg_addr);
     if (!reg) {
       return;
