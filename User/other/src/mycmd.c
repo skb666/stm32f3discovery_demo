@@ -10,7 +10,7 @@ extern int shell_usart_cmd(int argc, char *argv[]);
 #define HELP_LED ("led [all|3~10] [val]")
 #define HELP_I2CDETECT ("i2cdetect [-a]")
 #define HELP_I2CTRANSFER ("i2ctransfer { rLENGTH[@ADDR] | wLENGTH[@ADDR] DATA...}...")
-#define HELP_USART ("usart control")
+#define HELP_USART ("usart {1|3} { {-r|-t [val]} | {-s|-x DATA...} }")
 
 XCMD_EXPORT_CMD(led, shell_led_cmd, HELP_LED)
 XCMD_EXPORT_CMD(i2cdetect, shell_i2cdetect_cmd, HELP_I2CDETECT)

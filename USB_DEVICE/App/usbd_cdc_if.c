@@ -362,10 +362,10 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
       enable_global_irq();
     } break;
     case STATUS_USB_AS_USART1: {
-      uart_write(DEV_USART1, Buf, *Len);
+      uart_puts(DEV_USART1, Buf, *Len);
     } break;
     case STATUS_USB_AS_USART3: {
-      uart_write(DEV_USART3, Buf, *Len);
+      uart_puts(DEV_USART3, Buf, *Len);
     } break;
     default: {
     } break;
@@ -405,7 +405,12 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
 void usb_tx_trans(void)
 {
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
   NUM_TYPE length = 0;
+
+  if (hcdc->TxState != 0){
+    return;
+  }
 
   if (!ring_is_empty(&usb_tx_buffer))
   {
@@ -421,6 +426,7 @@ void usb_tx_trans(void)
 
 void usb_printf(const char *format, ...)
 {
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
   va_list args;
   uint32_t length;
   uint16_t success = 0;
@@ -439,12 +445,16 @@ void usb_printf(const char *format, ...)
     }
 
     usb_tx_trans();
+    while (hcdc->TxState != 0){
+      return;
+    }
     length -= success;
   } while (length);
 }
 
 void usb_puts(uint8_t* buf, uint16_t len)
 {
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
   uint16_t success = 0;
 
   do {
@@ -457,6 +467,9 @@ void usb_puts(uint8_t* buf, uint16_t len)
     }
 
     usb_tx_trans();
+    while (hcdc->TxState != 0){
+      return;
+    }
     len -= success;
   } while (len);
 }
