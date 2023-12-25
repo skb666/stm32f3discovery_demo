@@ -15,6 +15,11 @@ typedef enum {
   FRAME_TYPE_MAX,
 } FRAME_TYPE;
 
+typedef enum {
+  FROM_RX,
+  FROM_TX,
+} DATA_FROM;
+
 static void task_event_process(TASK *task, void (*callback)(EVENT *)) {
   int8_t err;
   EVENT *ev;
@@ -61,6 +66,94 @@ static void change_sys_status(void) {
       LL_USART_SetDataWidth(USART3, LL_USART_DATAWIDTH_8B);
     } break;
     default: {
+    } break;
+  }
+}
+
+static void usart1_tx_to_usb(uint8_t *buf, uint16_t len) {
+  SYS_PARAM *sys = sys_param_get();
+
+  switch (sys->status) {
+    case STATUS_SHELL: {
+      if (sys->flag.usb_tx.usart1_tx) {
+        usb_puts(buf, len);
+      }
+    } break;
+    default: {
+    } break;
+  }
+}
+
+static void usart3_tx_to_usb(uint8_t *buf, uint16_t len) {
+  SYS_PARAM *sys = sys_param_get();
+
+  switch (sys->status) {
+    case STATUS_SHELL: {
+      if (sys->flag.usb_tx.usart3_tx) {
+        usb_puts(buf, len);
+      }
+    } break;
+    default: {
+    } break;
+  }
+}
+
+static void usart1_rx_to_usb(uint8_t *buf, uint16_t len) {
+  SYS_PARAM *sys = sys_param_get();
+
+  switch (sys->status) {
+    case STATUS_SHELL: {
+      if (sys->flag.usb_tx.usart1_rx) {
+        usb_puts(buf, len);
+      }
+    } break;
+    case STATUS_USB_AS_USART1: {
+      usb_puts(buf, len);
+    } break;
+    default: {
+    } break;
+  }
+}
+
+static void usart3_rx_to_usb(uint8_t *buf, uint16_t len) {
+  SYS_PARAM *sys = sys_param_get();
+
+  switch (sys->status) {
+    case STATUS_SHELL: {
+      if (sys->flag.usb_tx.usart3_rx) {
+        usb_puts(buf, len);
+      }
+    } break;
+    case STATUS_USB_AS_USART3: {
+      usb_puts(buf, len);
+    } break;
+    default: {
+    } break;
+  }
+}
+
+static void (*usb_monitor(DEV_TYPE dev_type, DATA_FROM data_from))(uint8_t *, uint16_t) {
+  switch (dev_type) {
+    case DEV_USART1: {
+      if (data_from == FROM_TX) {
+        return usart1_tx_to_usb;
+      } else if (data_from == FROM_RX) {
+        return usart1_rx_to_usb;
+      } else {
+        return NULL;
+      }
+    } break;
+    case DEV_USART3: {
+      if (data_from == FROM_TX) {
+        return usart3_tx_to_usb;
+      } else if (data_from == FROM_RX) {
+        return usart3_rx_to_usb;
+      } else {
+        return NULL;
+      }
+    } break;
+    default: {
+      return NULL;
     } break;
   }
 }
@@ -158,42 +251,17 @@ void key_scan_handle(TASK *task) {
 /* 1ms 周期任务 */
 void timer_1ms_init(void) {
   task_event_subscribe(EVENT_TYPE_TICK_1MS, TASK_ID_TIMER_1MS);
-}
 
-static void usart1_tx_to_usb(uint8_t *buf, uint16_t len) {
-  SYS_PARAM *sys = sys_param_get();
-
-  switch (sys->status) {
-    case STATUS_SHELL: {
-      if (sys->flag.usb_tx.usart1_tx) {
-        usb_puts(buf, len);
-      }
-    } break;
-    default: {
-    } break;
-  }
-}
-
-static void usart3_tx_to_usb(uint8_t *buf, uint16_t len) {
-  SYS_PARAM *sys = sys_param_get();
-
-  switch (sys->status) {
-    case STATUS_SHELL: {
-      if (sys->flag.usb_tx.usart3_tx) {
-        usb_puts(buf, len);
-      }
-    } break;
-    default: {
-    } break;
-  }
+  uart_set_tx_monitor(DEV_USART1, usb_monitor(DEV_USART1, FROM_TX));
+  uart_set_tx_monitor(DEV_USART3, usb_monitor(DEV_USART3, FROM_TX));
 }
 
 static void timer_1ms_cb(EVENT *ev) {
   switch (ev->type) {
     case EVENT_TYPE_TICK_1MS: {
       // 串口发送
-      uart_tx_poll(DEV_USART1, usart1_tx_to_usb);
-      uart_tx_poll(DEV_USART3, usart3_tx_to_usb);
+      uart_tx_poll(DEV_USART1);
+      uart_tx_poll(DEV_USART3);
       // usb cdc 发送
       usb_tx_trans();
     } break;
@@ -227,6 +295,9 @@ static void print_frame_usart3(frame_parse_t *frame) {
 void main_loop_init(void) {
   xcmd_init(cmd_get_char, cmd_put_char);
   mycmd_init();
+
+  uart_set_rx_monitor(DEV_USART1, usb_monitor(DEV_USART1, FROM_RX));
+  uart_set_rx_monitor(DEV_USART3, usb_monitor(DEV_USART3, FROM_RX));
 
   frame_parse_register(DEV_USART1, FRAME_TYPE_DEBUG, print_frame_usart1);
   frame_parse_register(DEV_USART3, FRAME_TYPE_DEBUG, print_frame_usart3);

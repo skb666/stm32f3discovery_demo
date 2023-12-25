@@ -1,5 +1,7 @@
 #include "device.h"
 
+#include <stdarg.h>
+
 #include "common.h"
 #include "main.h"
 #include "ring_fifo.h"
@@ -17,9 +19,11 @@ typedef struct {
   uint16_t last_dmarx_size; /* dma上一次接收数据大小 */
   RING_FIFO rx_ring;
   RING_FIFO tx_ring;
+  void (*rx_monitor)(uint8_t *, uint16_t);
+  void (*tx_monitor)(uint8_t *, uint16_t);
 } uart_device_t;
 
-char print_buf[DEV_NUM][64];
+static uint8_t print_buf[UART_TX_RING_SIZE];
 
 static void (*func_list[DEV_NUM][FUNC_LIST_MAX])(frame_parse_t *);
 
@@ -117,7 +121,7 @@ void uart_config(DEV_TYPE dev_type) {
       .buffer = __uart_tx_ring_data[dev_type],
       .capacity = UART_TX_RING_SIZE,
       .element_size = sizeof(__uart_tx_ring_data[dev_type][0]),
-      .cover = 1,
+      .cover = 0,
       .head = 0,
       .tail = 0,
       .size = 0,
@@ -126,12 +130,24 @@ void uart_config(DEV_TYPE dev_type) {
   rx_frame[dev_type].data = __frame_data[dev_type];
 }
 
+void uart_set_rx_monitor(DEV_TYPE dev_type, void (*monitor)(uint8_t *, uint16_t)) {
+  if (monitor) {
+    uart_dev[dev_type].rx_monitor = monitor;
+  }
+}
+
+void uart_set_tx_monitor(DEV_TYPE dev_type, void (*monitor)(uint8_t *, uint16_t)) {
+  if (monitor) {
+    uart_dev[dev_type].tx_monitor = monitor;
+  }
+}
+
 /**
  * @brief  串口dma接收完成中断处理
  * @param
  * @retval
  */
-void uart_dmarx_done_isr(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_t)) {
+void uart_dmarx_done_isr(DEV_TYPE dev_type) {
   uint16_t recv_size;
 
   recv_size = UART_DMARX_BUF_SIZE - uart_dev[dev_type].last_dmarx_size;
@@ -140,8 +156,8 @@ void uart_dmarx_done_isr(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_t)) {
   ring_push_mult(&uart_dev[dev_type].rx_ring, &uart_dmarx_buf[dev_type][uart_dev[dev_type].last_dmarx_size], recv_size);
   enable_global_irq();
 
-  if (func) {
-    func(&uart_dmarx_buf[dev_type][uart_dev[dev_type].last_dmarx_size], recv_size);
+  if (uart_dev[dev_type].rx_monitor) {
+    uart_dev[dev_type].rx_monitor(&uart_dmarx_buf[dev_type][uart_dev[dev_type].last_dmarx_size], recv_size);
   }
 
   uart_dev[dev_type].last_dmarx_size = 0;
@@ -152,7 +168,7 @@ void uart_dmarx_done_isr(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_t)) {
  * @param
  * @retval
  */
-void uart_dmarx_part_done_isr(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_t)) {
+void uart_dmarx_part_done_isr(DEV_TYPE dev_type) {
   uint16_t recv_total_size;
   uint16_t recv_size;
 
@@ -172,8 +188,8 @@ void uart_dmarx_part_done_isr(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_
   ring_push_mult(&uart_dev[dev_type].rx_ring, &uart_dmarx_buf[dev_type][uart_dev[dev_type].last_dmarx_size], recv_size);
   enable_global_irq();
 
-  if (func) {
-    func(&uart_dmarx_buf[dev_type][uart_dev[dev_type].last_dmarx_size], recv_size);
+  if (uart_dev[dev_type].rx_monitor) {
+    uart_dev[dev_type].rx_monitor(&uart_dmarx_buf[dev_type][uart_dev[dev_type].last_dmarx_size], recv_size);
   }
 
   uart_dev[dev_type].last_dmarx_size = recv_total_size;
@@ -195,7 +211,7 @@ void uart_wait_tx(DEV_TYPE dev_type) {
   }
 }
 
-void uart_tx_poll(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_t)) {
+void uart_tx_poll(DEV_TYPE dev_type) {
   uint16_t size = 0;
 
   if (uart_dev[dev_type].status) {
@@ -210,8 +226,8 @@ void uart_tx_poll(DEV_TYPE dev_type, void (*func)(uint8_t *, uint16_t)) {
   size = ring_pop_mult(&uart_dev[dev_type].tx_ring, uart_dmatx_buf[dev_type], UART_DMATX_BUF_SIZE);
   enable_global_irq();
 
-  if (func) {
-    func(uart_dmatx_buf[dev_type], size);
+  if (uart_dev[dev_type].tx_monitor) {
+    uart_dev[dev_type].tx_monitor(uart_dmatx_buf[dev_type], size);
   }
 
   uart_dev[dev_type].status = 1;
@@ -354,4 +370,42 @@ void uart_frame_parse(DEV_TYPE dev_type) {
 #endif
     } break;
   }
+}
+
+void uart_printf(DEV_TYPE dev_type, const char *format, ...) {
+  va_list args;
+  uint32_t length;
+  uint16_t success = 0;
+
+  va_start(args, format);
+  length = vsnprintf((char *)print_buf, UART_TX_RING_SIZE, (char *)format, args);
+  va_end(args);
+
+  do {
+    success = uart_write(dev_type, print_buf, length);
+
+    if (success == length) {
+      return;
+    }
+
+    uart_tx_poll(dev_type);
+    uart_wait_tx(dev_type);
+    length -= success;
+  } while (length);
+}
+
+void uart_puts(DEV_TYPE dev_type, uint8_t *buf, uint16_t len) {
+  uint16_t success = 0;
+
+  do {
+    success = uart_write(dev_type, buf, len);
+
+    if (success == len) {
+      return;
+    }
+
+    uart_tx_poll(dev_type);
+    uart_wait_tx(dev_type);
+    len -= success;
+  } while (len);
 }

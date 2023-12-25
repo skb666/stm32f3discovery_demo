@@ -25,8 +25,6 @@
 #include "task.h"
 #include "timer.h"
 #include "device.h"
-#include "param.h"
-#include "usbd_cdc_if.h"
 #include "i2c_slave.h"
 /* USER CODE END Includes */
 
@@ -57,51 +55,7 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static void usart1_monitor(uint8_t *buf, uint16_t len) {
-  SYS_PARAM *sys = sys_param_get();
-  
-  switch (sys->status) {
-    case STATUS_SHELL: {
-      if (sys->flag.usb_tx.usart1_rx) {
-        usb_puts(buf, len);
-      }
-    } break;
-    case STATUS_USB_AS_USART1: {
-      usb_puts(buf, len);
-    } break;
-    default: {
-    } break;
-  }
-}
-static void usart3_monitor(uint8_t *buf, uint16_t len) {
-  SYS_PARAM *sys = sys_param_get();
-  
-  switch (sys->status) {
-    case STATUS_SHELL: {
-      if (sys->flag.usb_tx.usart3_rx) {
-        usb_puts(buf, len);
-      }
-    } break;
-    case STATUS_USB_AS_USART3: {
-      usb_puts(buf, len);
-    } break;
-    default: {
-    } break;
-  }
-}
-static void (*usb_monitor(DEV_TYPE dev_type))(uint8_t *, uint16_t) {
-  switch (dev_type) {
-    case DEV_USART1: {
-      return usart1_monitor;
-    } break;
-    case DEV_USART3: {
-      return usart3_monitor;
-    } break;
-    default: {
-      return NULL;
-    } break;
-  }
-}
+
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -282,10 +236,10 @@ void DMA1_Channel3_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
   if (LL_DMA_IsActiveFlag_HT3(DMA1)) {
     LL_DMA_ClearFlag_HT3(DMA1);
-    uart_dmarx_part_done_isr(DEV_USART3, usb_monitor(DEV_USART3));
+    uart_dmarx_part_done_isr(DEV_USART3);
   } else if (LL_DMA_IsActiveFlag_TC3(DMA1)) {
     LL_DMA_ClearFlag_TC3(DMA1);
-    uart_dmarx_done_isr(DEV_USART3, usb_monitor(DEV_USART3));
+    uart_dmarx_done_isr(DEV_USART3);
   }
   /* USER CODE END DMA1_Channel3_IRQn 1 */
 }
@@ -319,10 +273,10 @@ void DMA1_Channel5_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
   if (LL_DMA_IsActiveFlag_HT5(DMA1)) {
     LL_DMA_ClearFlag_HT5(DMA1);
-    uart_dmarx_part_done_isr(DEV_USART1, usb_monitor(DEV_USART1));
+    uart_dmarx_part_done_isr(DEV_USART1);
   } else if (LL_DMA_IsActiveFlag_TC5(DMA1)) {
     LL_DMA_ClearFlag_TC5(DMA1);
-    uart_dmarx_done_isr(DEV_USART1, usb_monitor(DEV_USART1));
+    uart_dmarx_done_isr(DEV_USART1);
   }
   /* USER CODE END DMA1_Channel5_IRQn 1 */
 }
@@ -422,7 +376,7 @@ void USART1_IRQHandler(void)
   /* USER CODE BEGIN USART1_IRQn 1 */
   if (LL_USART_IsActiveFlag_IDLE(USART1)) {
     LL_USART_ClearFlag_IDLE(USART1);
-    uart_dmarx_part_done_isr(DEV_USART1, usb_monitor(DEV_USART1));
+    uart_dmarx_part_done_isr(DEV_USART1);
   }
   /* USER CODE END USART1_IRQn 1 */
 }
@@ -438,7 +392,7 @@ void USART3_IRQHandler(void)
   /* USER CODE BEGIN USART3_IRQn 1 */
   if (LL_USART_IsActiveFlag_IDLE(USART3)) {
     LL_USART_ClearFlag_IDLE(USART3);
-    uart_dmarx_part_done_isr(DEV_USART3, usb_monitor(DEV_USART3));
+    uart_dmarx_part_done_isr(DEV_USART3);
   }
   /* USER CODE END USART3_IRQn 1 */
 }
