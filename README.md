@@ -10,3 +10,4 @@
 	- led 控制
 	- i2cdetect
 	- i2ctransfer
+	- usart 调试助手

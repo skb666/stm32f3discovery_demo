@@ -23,7 +23,7 @@ typedef struct {
   void (*tx_monitor)(uint8_t *, uint16_t);
 } uart_device_t;
 
-static uint8_t print_buf[UART_TX_RING_SIZE];
+_CCM_DATA static uint8_t print_buf[UART_TX_RING_SIZE];
 
 static void (*func_list[DEV_NUM][FUNC_LIST_MAX])(frame_parse_t *);
 

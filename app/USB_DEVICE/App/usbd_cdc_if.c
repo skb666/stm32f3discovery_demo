@@ -35,7 +35,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-static char tx_buffer[APP_TX_DATA_SIZE];
+_CCM_DATA static char tx_buffer[APP_TX_DATA_SIZE];
 ring_define_static(_CCM_DATA uint8_t, usb_rx_buffer, APP_RX_DATA_SIZE, 1);
 ring_define_static(_CCM_DATA uint8_t, usb_tx_buffer, APP_TX_DATA_SIZE, 0);
 /* USER CODE END PV */
