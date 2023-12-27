@@ -186,4 +186,113 @@
       </folder>
     </folder>
   </project>
+  <project Name="stm32f3-bld">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="STM32F303VCTx"
+      arm_architecture="v7EM"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x08000000;0x00040000;RAM;0x10000000;0x00002000;RAM;0x20000000;0x0000A000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="STM32F303VC"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;STM32F303xC;__STM32F303_SUBFAMILY;__STM32F3XX_FAMILY;USE_FULL_LL_DRIVER;USE_HAL_DRIVER"
+      c_user_include_directories="$(ProjectDir)/STM32F3xx/Device/Include;$(ProjectDir)/../Drivers/CMSIS/Include;$(ProjectDir)/../Drivers/CMSIS/Device/ST/STM32F3xx/Include;$(ProjectDir)/../Drivers/STM32F3xx_HAL_Driver/Inc;$(ProjectDir)/../Drivers/STM32F3xx_HAL_Driver/Inc/Legacy;$(ProjectDir)/../Core/Inc;$(ProjectDir)/../User/RING_FIFO/inc;$(ProjectDir)/../User/task_event/core/inc;$(ProjectDir)/../User/task_event/user/inc;$(ProjectDir)/../User/task_event/app/inc;$(ProjectDir)/../User/other/inc"
+      debug_register_definition_file="$(ProjectDir)/STM32F30x_Registers.xml"
+      debug_stack_pointer_start="__stack_end__"
+      debug_start_from_entry_point_symbol="Yes"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="$(ProjectDir)/STM32F3xx_Flash_CCM.icf"
+      linker_memory_map_file="$(ProjectDir)/STM32F303VCTx_MemoryMap.xml"
+      linker_printf_fp_enabled="Double"
+      linker_printf_width_precision_supported="Yes"
+      macros="DeviceHeaderFile=$(PackagesDir)/STM32F3xx/Device/Include/stm32f3xx.h;DeviceSystemFile=$(PackagesDir)/STM32F3xx/Device/Source/system_stm32f3xx.c;DeviceVectorsFile=$(PackagesDir)/STM32F3xx/Source/stm32f303xc_Vectors.s;DeviceFamily=STM32F3xx;DeviceSubFamily=STM32F303;Target=STM32F303VCTx"
+      project_directory="bld/emStudio"
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="Core">
+      <file file_name="../Core/Src/common.c" />
+      <file file_name="../Core/Src/crc.c" />
+      <file file_name="../Core/Src/dma.c" />
+      <file file_name="../Core/Src/gpio.c" />
+      <file file_name="../Core/Src/iwdg.c" />
+      <file file_name="../Core/Src/main.c" />
+      <file file_name="../Core/Src/stm32f3xx_hal_msp.c" />
+      <file file_name="../Core/Src/stm32f3xx_it.c" />
+      <file file_name="../Core/Src/system_stm32f3xx.c" />
+      <file file_name="../Core/Src/usart.c" />
+    </folder>
+    <folder Name="Drivers">
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_cortex.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_crc.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_crc_ex.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_dma.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_exti.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_flash.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_flash_ex.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_gpio.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_i2c.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_i2c_ex.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pwr.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pwr_ex.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_rcc.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_rcc_ex.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_tim.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_tim_ex.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_dma.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_exti.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_gpio.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_rcc.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_usart.c" />
+      <file file_name="../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_utils.c" />
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="STM32F3xx/Scripts/STM32F3xx_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="SEGGER_THUMB_Startup.s" />
+      <file file_name="STM32F3xx/Source/stm32f303xc_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="STM32F3xx/Source/STM32F3xx_Startup.s" />
+    </folder>
+    <folder Name="User">
+      <folder Name="other">
+        <file file_name="../User/other/src/device.c" />
+        <file file_name="../User/other/src/onchip_flash.c" />
+        <file file_name="../User/other/src/param.c" />
+        <file file_name="../User/other/src/update.c" />
+      </folder>
+      <folder Name="RING_FIFO">
+        <file file_name="../User/RING_FIFO/src/ring_fifo.c" />
+      </folder>
+      <folder Name="task_event">
+        <folder Name="app">
+          <file file_name="../User/task_event/app/src/task_main.c" />
+        </folder>
+        <folder Name="core">
+          <file file_name="../User/task_event/core/src/event.c" />
+          <file file_name="../User/task_event/core/src/task.c" />
+          <file file_name="../User/task_event/core/src/timer.c" />
+        </folder>
+        <folder Name="user">
+          <file file_name="../User/task_event/user/src/task_user.c" />
+          <file file_name="../User/task_event/user/src/timer_user.c" />
+        </folder>
+      </folder>
+    </folder>
+  </project>
 </solution>
