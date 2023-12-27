@@ -376,13 +376,16 @@ void uart_printf(DEV_TYPE dev_type, const char *format, ...) {
   va_list args;
   uint32_t length;
   uint16_t success = 0;
+  uint8_t *pbuf;
 
   va_start(args, format);
   length = vsnprintf((char *)print_buf, UART_TX_RING_SIZE, (char *)format, args);
   va_end(args);
 
+  pbuf = print_buf;
+
   do {
-    success = uart_write(dev_type, print_buf, length);
+    success = uart_write(dev_type, pbuf, length);
 
     if (success == length) {
       return;
@@ -390,15 +393,19 @@ void uart_printf(DEV_TYPE dev_type, const char *format, ...) {
 
     uart_tx_poll(dev_type);
     uart_wait_tx(dev_type);
+    pbuf += success;
     length -= success;
   } while (length);
 }
 
 void uart_puts(DEV_TYPE dev_type, uint8_t *buf, uint16_t len) {
   uint16_t success = 0;
+  uint8_t *pbuf;
+
+  pbuf = buf;
 
   do {
-    success = uart_write(dev_type, buf, len);
+    success = uart_write(dev_type, pbuf, len);
 
     if (success == len) {
       return;
@@ -406,6 +413,7 @@ void uart_puts(DEV_TYPE dev_type, uint8_t *buf, uint16_t len) {
 
     uart_tx_poll(dev_type);
     uart_wait_tx(dev_type);
+    pbuf += success;
     len -= success;
   } while (len);
 }

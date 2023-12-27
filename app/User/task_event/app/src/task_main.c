@@ -285,11 +285,11 @@ static int cmd_put_char(uint8_t ch) {
 }
 
 static void print_frame_usart1(frame_parse_t *frame) {
-  uart_write(DEV_USART1, frame->data, frame->length);
+  uart_puts(DEV_USART1, frame->data, frame->length);
 }
 
 static void print_frame_usart3(frame_parse_t *frame) {
-  uart_write(DEV_USART3, frame->data, frame->length);
+  uart_puts(DEV_USART3, frame->data, frame->length);
 }
 
 void main_loop_init(void) {

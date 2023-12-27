@@ -430,14 +430,17 @@ void usb_printf(const char *format, ...)
   va_list args;
   uint32_t length;
   uint16_t success = 0;
+  uint8_t *pbuf;
 
   va_start(args, format);
   length = vsnprintf(tx_buffer, APP_TX_DATA_SIZE, (char *)format, args);
   va_end(args);
+
+  pbuf = (uint8_t *)tx_buffer;
   
   do {
     disable_global_irq();
-    success = ring_push_mult(&usb_tx_buffer, tx_buffer, length);
+    success = ring_push_mult(&usb_tx_buffer, pbuf, length);
     enable_global_irq();
 
     if (success == length) {
@@ -448,6 +451,7 @@ void usb_printf(const char *format, ...)
     while (hcdc->TxState != 0){
       return;
     }
+    pbuf += success;
     length -= success;
   } while (length);
 }
@@ -456,10 +460,13 @@ void usb_puts(uint8_t* buf, uint16_t len)
 {
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
   uint16_t success = 0;
+  uint8_t *pbuf;
+
+  pbuf = buf;
 
   do {
     disable_global_irq();
-    success = ring_push_mult(&usb_tx_buffer, buf, len);
+    success = ring_push_mult(&usb_tx_buffer, pbuf, len);
     enable_global_irq();
 
     if (success == len) {
@@ -470,6 +477,7 @@ void usb_puts(uint8_t* buf, uint16_t len)
     while (hcdc->TxState != 0){
       return;
     }
+    pbuf += success;
     len -= success;
   } while (len);
 }
