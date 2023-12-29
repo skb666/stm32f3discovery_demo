@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "common.h"
 #include "device.h"
 #include "key.h"
 #include "main.h"
@@ -169,25 +170,17 @@ void debug_print_init(void) {
 static void debug_print_cb(EVENT *ev) {
   switch (ev->type) {
     case EVENT_TYPE_KEY_PRESS: {
-#ifdef DEBUG
-      printf("[KEY]: PRESS\n");
-#endif
+      printf_dbg("[KEY]: PRESS\n");
       change_sys_status();
     } break;
     case EVENT_TYPE_KEY_RELEASE: {
-#ifdef DEBUG
-      printf("[KEY]: RELEASE\n");
-#endif
+      printf_dbg("[KEY]: RELEASE\n");
     } break;
     case EVENT_TYPE_KEY_LONG_PRESS: {
-#ifdef DEBUG
-      printf("[KEY]: LONG_PRESS\n");
-#endif
+      printf_dbg("[KEY]: LONG_PRESS\n");
     } break;
     case EVENT_TYPE_KEY_LONG_RELEASE: {
-#ifdef DEBUG
-      printf("[KEY]: LONG_RELEASE\n");
-#endif
+      printf_dbg("[KEY]: LONG_RELEASE\n");
     } break;
     default: {
     } break;

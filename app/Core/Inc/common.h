@@ -9,6 +9,12 @@
 
 #define ARRAY_SIZE(array_name) ((int)(sizeof(array_name) / sizeof(array_name[0])))
 
+#ifdef DEBUG
+#define printf_dbg(fmt, args...) printf(fmt, ##args)
+#else
+#define printf_dbg(fmt, args...)
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

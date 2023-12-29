@@ -343,9 +343,7 @@ void uart_frame_parse(DEV_TYPE dev_type) {
           change_byte_order((uint8_t *)&rx_frame[dev_type].length, sizeof(rx_frame[dev_type].length));
         }
         if (rx_frame[dev_type].length > FRAME_DATA_LEN_MAX) {
-#ifdef DEBUG
-          printf("frame length error!!! (%hu)\n", rx_frame[dev_type].length);
-#endif
+          printf_dbg("frame length error!!! (%hu)\n", rx_frame[dev_type].length);
           rx_frame[dev_type].status = PARSE_STAT_HEAD1;
         } else {
           rx_frame[dev_type].status = PARSE_STAT_DATA;
@@ -365,9 +363,7 @@ void uart_frame_parse(DEV_TYPE dev_type) {
       }
     } break;
     default: {
-#ifdef DEBUG
-      printf("frame status error!!!\n");
-#endif
+      printf_dbg("frame status error!!!\n");
     } break;
   }
 }
