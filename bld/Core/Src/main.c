@@ -29,6 +29,7 @@
 #include "device.h"
 #include "param.h"
 #include "task.h"
+#include "update.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -97,12 +98,17 @@ int main(void)
   MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
   uart_config(DEV_USART1);
-  sys_param_init();
-  task_init();
+
+  boot_test();
+
+  LL_IWDG_ReloadCounter(IWDG);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  sys_param_init();
+  task_init();
+
   while (1)
   {
     // 任务事件循环

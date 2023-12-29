@@ -7,22 +7,9 @@
 extern "C" {
 #endif
 
-typedef enum {
-  UPDATE_BEGIN,
-  UPDATE_WAITTING,
-  UPDATE_TRANSMIT,
-  UPDATE_END,
-} UPDATE_STAGE;
-
 typedef struct {
-  uint16_t pkg_num : 12;
-  uint16_t running : 1;
-  uint16_t errno : 3;
-} UPDATE_STATUS;
-
-typedef struct {
-  UPDATE_STAGE stage;
-  UPDATE_STATUS status;
+  uint16_t stage;
+  uint16_t status;
 } UPDATE_CTRL;
 
 typedef struct {

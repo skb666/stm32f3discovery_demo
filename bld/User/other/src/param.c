@@ -11,6 +11,6 @@ SYS_PARAM *sys_param_get(void) {
 void sys_param_init(void) {
   memset(&sys_param, 0, sizeof(SYS_PARAM));
 
-  sys_param.ctrl.update.stage = UPDATE_BEGIN;
-  *(uint16_t *)&sys_param.ctrl.update.status = 0xEFFF;
+  sys_param.ctrl.update.stage = 0;
+  sys_param.ctrl.update.status = 0xEFFF;
 }
