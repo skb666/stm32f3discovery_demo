@@ -12,18 +12,6 @@ static inline uint32_t STMFLASH_GetPage(uint32_t Addr) {
   return page;
 }
 
-static inline uint16_t STMFLASH_ReadHalfWord(uint32_t faddr) {
-  return *(__IO uint16_t *)faddr;
-}
-
-static inline uint32_t STMFLASH_ReadWord(uint32_t faddr) {
-  return *(__IO uint32_t *)faddr;
-}
-
-static inline uint64_t STMFLASH_ReadDoubleWord(uint32_t faddr) {
-  return *(__IO uint64_t *)faddr;
-}
-
 int8_t STMFLASH_Read(const uint32_t ReadAddr, uint16_t *pBuffer, uint32_t Num) {
   uint32_t addrx = 0;
   uint32_t addr_end = 0;
@@ -42,7 +30,6 @@ int8_t STMFLASH_Read(const uint32_t ReadAddr, uint16_t *pBuffer, uint32_t Num) {
 
   return 0;
 }
-
 
 int8_t STMFLASH_Write(uint32_t WriteAddr, uint16_t *pBuffer, uint32_t Num) {
   FLASH_EraseInitTypeDef FlashEraseInit;
@@ -79,21 +66,22 @@ int8_t STMFLASH_Write(uint32_t WriteAddr, uint16_t *pBuffer, uint32_t Num) {
   return 0;
 }
 
-int8_t STMFLASH_Erase(uint32_t addr_start, uint32_t addr_end, uint32_t retry) {
-  uint32_t PageError = addr_start;
+int8_t STMFLASH_Erase(uint32_t addrx, uint32_t length, uint32_t retry) {
+  uint32_t PageError = addrx;
   FLASH_EraseInitTypeDef FlashEraseInit;
   HAL_StatusTypeDef status = HAL_OK;
-  uint64_t temp;
+  uint32_t addr_end = addrx + length;
 
-  if (addr_start < STMFLASH_BASE || addr_end >= STMFLASH_END || addr_start > addr_end) {
+  if (addrx < STMFLASH_BASE || addr_end >= STMFLASH_END) {
     return -1;  // 非法地址
   }
 
-  while (addr_start < addr_end) {
-    if (STMFLASH_ReadDoubleWord(addr_start) != 0xFFFFFFFFFFFFFFFF) {
+  while (addrx < addr_end) {
+    if (STMFLASH_ReadDoubleWord(addrx) != 0xFFFFFFFFFFFFFFFF) {
       status = HAL_ERROR;
       break;
     }
+    addrx += 8;
   }
 
   if (status == HAL_OK) {
@@ -106,7 +94,7 @@ int8_t STMFLASH_Erase(uint32_t addr_start, uint32_t addr_end, uint32_t retry) {
 
   do {
     FlashEraseInit.TypeErase = FLASH_TYPEERASE_PAGES;                                       // 擦除类型，页擦除
-    FlashEraseInit.PageAddress = STMFLASH_GetPage(PageError);                               // 要擦除的页
+    FlashEraseInit.PageAddress = PageError;                                                 // 要擦除的页
     FlashEraseInit.NbPages = STMFLASH_GetPage(addr_end) - STMFLASH_GetPage(PageError) + 1;  // 擦除页数
 
     status = HAL_FLASHEx_Erase(&FlashEraseInit, &PageError);

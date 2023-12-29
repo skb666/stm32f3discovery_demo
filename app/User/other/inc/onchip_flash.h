@@ -139,9 +139,21 @@
 extern "C" {
 #endif
 
-int8_t STMFLASH_Erase(uint32_t addr_start, uint32_t addr_end, uint32_t retry);
+static inline uint16_t STMFLASH_ReadHalfWord(uint32_t faddr) {
+  return *(volatile uint16_t *)faddr;
+}
+
+static inline uint32_t STMFLASH_ReadWord(uint32_t faddr) {
+  return *(volatile uint32_t *)faddr;
+}
+
+static inline uint64_t STMFLASH_ReadDoubleWord(uint32_t faddr) {
+  return *(volatile uint64_t *)faddr;
+}
+
 int8_t STMFLASH_Write(uint32_t WriteAddr, uint16_t *pBuffer, uint32_t Num);
 int8_t STMFLASH_Read(const uint32_t ReadAddr, uint16_t *pBuffer, uint32_t Num);
+int8_t STMFLASH_Erase(uint32_t addrx, uint32_t length, uint32_t retry);
 
 #ifdef __cplusplus
 }
