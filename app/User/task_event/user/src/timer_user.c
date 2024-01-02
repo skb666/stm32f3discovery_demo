@@ -14,7 +14,7 @@ static TIMER s_timer_list[] = {
         .priority = 0,
         .reload = TICK_25MS,
         .tick = TICK_25MS,
-        .times = -1,
+        .times = 0,
     },
     {
         .event_type = EVENT_TYPE_TICK_1S,

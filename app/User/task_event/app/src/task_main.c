@@ -1,8 +1,8 @@
 #include <stdio.h>
 
+#include "combo_key.h"
 #include "common.h"
 #include "device.h"
-#include "key.h"
 #include "main.h"
 #include "mycmd.h"
 #include "param.h"
@@ -165,6 +165,7 @@ void debug_print_init(void) {
   task_event_subscribe(EVENT_TYPE_KEY_RELEASE, TASK_ID_DEBUG_PRINT);
   task_event_subscribe(EVENT_TYPE_KEY_LONG_PRESS, TASK_ID_DEBUG_PRINT);
   task_event_subscribe(EVENT_TYPE_KEY_LONG_RELEASE, TASK_ID_DEBUG_PRINT);
+  task_event_subscribe(EVENT_TYPE_KEY_COMBO, TASK_ID_DEBUG_PRINT);
 }
 
 static void debug_print_cb(EVENT *ev) {
@@ -181,6 +182,9 @@ static void debug_print_cb(EVENT *ev) {
     } break;
     case EVENT_TYPE_KEY_LONG_RELEASE: {
       printf_dbg("[KEY]: LONG_RELEASE\n");
+    } break;
+    case EVENT_TYPE_KEY_COMBO: {
+      printf_dbg("[KEY]: COMBO %hu\n", (size_t)ev->custom_data);
     } break;
     default: {
     } break;
@@ -201,35 +205,39 @@ static KEY_VALUE getKey(void) {
 }
 
 void key_scan_init(void) {
-  task_event_subscribe(EVENT_TYPE_TICK_25MS, TASK_ID_KEY_SCAN);
+  task_event_subscribe(EVENT_TYPE_TICK_1MS, TASK_ID_KEY_SCAN);
+
+  key_register(getKey, NULL, 300);
 }
 
 static void key_scan_cb(EVENT *ev) {
-  static KEY key = {
-      .status = KS_RELEASE,
-      .count = 0,
-      .get = getKey,
-  };
-  static KEY_EVENT k_ev;
+  KEY_EVENT *k_ev;
+  int num;
 
   switch (ev->type) {
-    case EVENT_TYPE_TICK_25MS: {
-      k_ev = key_status_check(&key, 20);
-      switch (k_ev) {
-        case KE_PRESS: {
-          task_event_publish(EVENT_TYPE_KEY_PRESS, NULL, 0);
-        } break;
-        case KE_RELEASE: {
-          task_event_publish(EVENT_TYPE_KEY_RELEASE, NULL, 0);
-        } break;
-        case KE_LONG_PRESS: {
-          task_event_publish(EVENT_TYPE_KEY_LONG_PRESS, NULL, 0);
-        } break;
-        case KE_LONG_RELEASE: {
-          task_event_publish(EVENT_TYPE_KEY_LONG_RELEASE, NULL, 0);
-        } break;
-        default: {
-        } break;
+    case EVENT_TYPE_TICK_1MS: {
+      combo_key_check();
+      k_ev = key_event_get(&num);
+      for (int i = 0; i < num; ++i) {
+        switch (k_ev[i]) {
+          case KE_PRESS: {
+            task_event_publish(EVENT_TYPE_KEY_PRESS, NULL, 0);
+          } break;
+          case KE_RELEASE: {
+            task_event_publish(EVENT_TYPE_KEY_RELEASE, NULL, 0);
+          } break;
+          case KE_LONG_PRESS: {
+            task_event_publish(EVENT_TYPE_KEY_LONG_PRESS, NULL, 0);
+          } break;
+          case KE_LONG_RELEASE: {
+            task_event_publish(EVENT_TYPE_KEY_LONG_RELEASE, NULL, 0);
+          } break;
+          case KE_COMBO: {
+            task_event_publish(EVENT_TYPE_KEY_COMBO, (void *)(size_t)key_combo_count(i), 0);
+          } break;
+          default: {
+          } break;
+        }
       }
     } break;
     default: {

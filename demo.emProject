@@ -146,6 +146,7 @@
     </folder>
     <folder Name="User">
       <folder Name="KEY">
+        <file file_name="../User/KEY/src/combo_key.c" />
         <file file_name="../User/KEY/src/key.c" />
       </folder>
       <folder Name="other">
