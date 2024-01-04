@@ -22,18 +22,20 @@ typedef enum {
 } KEY_STATUS;
 
 typedef enum {
+  KE_NONE = 0,
+  KE_ERROR,
   KE_PRESS,
   KE_RELEASE,
   KE_LONG_PRESS,
   KE_LONG_RELEASE,
   KE_COMBO,
-  KE_NONE,
 } KEY_EVENT;
 
 typedef struct {
   uint16_t id;
   uint16_t interval;
   KEY_STATUS status;
+  KEY_EVENT event;
   uint16_t press_cnt;
   uint16_t release_cnt;
   uint16_t press_time;
@@ -43,12 +45,12 @@ typedef struct {
 } KEY;
 
 KEY *key_list_get(int *num);
-KEY_EVENT *key_event_get(int *num);
-uint16_t key_id_get(int index);
-uint16_t key_combo_count(int index);
+KEY *key_find_by_id(int id);
+KEY_EVENT key_event_get(KEY *key);
+int key_combo_count(KEY *key);
 
-int8_t key_register(KEY_VALUE (*get)(void), void *custom_data, uint16_t interval);
-void combo_key_check(void);
+int8_t key_register(uint16_t id, KEY_VALUE (*get)(void), void *custom_data, uint16_t interval);
+KEY_EVENT combo_key_event_check(KEY *key);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
 #include "key.h"
 
-KEY_EVENT key_status_check(KEY *key, int interval) {
+KEY_EVENT key_event_check(KEY *key, int interval) {
   KEY_EVENT key_event = KE_NONE;
 
   switch (key->status) {

@@ -207,19 +207,18 @@ static KEY_VALUE getKey(void) {
 void key_scan_init(void) {
   task_event_subscribe(EVENT_TYPE_TICK_1MS, TASK_ID_KEY_SCAN);
 
-  key_register(getKey, NULL, 300);
+  key_register(0, getKey, NULL, 300);
 }
 
 static void key_scan_cb(EVENT *ev) {
-  KEY_EVENT *k_ev;
+  KEY *key_list;
   int num;
 
   switch (ev->type) {
     case EVENT_TYPE_TICK_1MS: {
-      combo_key_check();
-      k_ev = key_event_get(&num);
+      key_list = key_list_get(&num);
       for (int i = 0; i < num; ++i) {
-        switch (k_ev[i]) {
+        switch (combo_key_event_check(&key_list[i])) {
           case KE_PRESS: {
             task_event_publish(EVENT_TYPE_KEY_PRESS, NULL, 0);
           } break;
@@ -233,7 +232,7 @@ static void key_scan_cb(EVENT *ev) {
             task_event_publish(EVENT_TYPE_KEY_LONG_RELEASE, NULL, 0);
           } break;
           case KE_COMBO: {
-            task_event_publish(EVENT_TYPE_KEY_COMBO, (void *)(size_t)key_combo_count(i), 0);
+            task_event_publish(EVENT_TYPE_KEY_COMBO, (void *)(size_t)key_combo_count(&key_list[i]), 0);
           } break;
           default: {
           } break;

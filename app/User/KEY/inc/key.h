@@ -30,7 +30,7 @@ typedef struct {
   KEY_VALUE (*get)(void);
 } KEY;
 
-KEY_EVENT key_status_check(KEY *key, int interval);
+KEY_EVENT key_event_check(KEY *key, int interval);
 
 #ifdef __cplusplus
 }
