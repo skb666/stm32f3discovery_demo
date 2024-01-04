@@ -29,6 +29,7 @@ typedef enum {
   KE_LONG_PRESS,
   KE_LONG_RELEASE,
   KE_COMBO,
+  KE_COMBO_RELEASE,
 } KEY_EVENT;
 
 typedef struct {

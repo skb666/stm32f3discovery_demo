@@ -166,6 +166,7 @@ void debug_print_init(void) {
   task_event_subscribe(EVENT_TYPE_KEY_LONG_PRESS, TASK_ID_DEBUG_PRINT);
   task_event_subscribe(EVENT_TYPE_KEY_LONG_RELEASE, TASK_ID_DEBUG_PRINT);
   task_event_subscribe(EVENT_TYPE_KEY_COMBO, TASK_ID_DEBUG_PRINT);
+  task_event_subscribe(EVENT_TYPE_KEY_COMBO_RELEASE, TASK_ID_DEBUG_PRINT);
 }
 
 static void debug_print_cb(EVENT *ev) {
@@ -185,6 +186,9 @@ static void debug_print_cb(EVENT *ev) {
     } break;
     case EVENT_TYPE_KEY_COMBO: {
       printf_dbg("[KEY]: COMBO %hu\n", (size_t)ev->custom_data);
+    } break;
+    case EVENT_TYPE_KEY_COMBO_RELEASE: {
+      printf_dbg("[KEY]: COMBO_RELEASE %hu\n", (size_t)ev->custom_data);
     } break;
     default: {
     } break;
@@ -232,6 +236,9 @@ static void key_scan_cb(EVENT *ev) {
           } break;
           case KE_COMBO: {
             task_event_publish(EVENT_TYPE_KEY_COMBO, (void *)(size_t)key_combo_count(&key_list[i]), 0);
+          } break;
+          case KE_COMBO_RELEASE: {
+            task_event_publish(EVENT_TYPE_KEY_COMBO_RELEASE, (void *)(size_t)key_combo_count(&key_list[i]), 0);
           } break;
           default: {
           } break;

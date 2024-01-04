@@ -124,6 +124,8 @@ KEY_EVENT combo_key_event_check(KEY *key) {
         if (key->release_cnt == key->ageing) {
           if (key->release_time == 1) {
             key->event = KE_RELEASE;
+          } else {
+            key->event = KE_COMBO_RELEASE;
           }
           key->status = KS_NONE;
         }
