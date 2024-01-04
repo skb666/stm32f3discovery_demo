@@ -41,7 +41,7 @@ int key_combo_count(KEY *key) {
   return key->press_time;
 }
 
-int8_t key_register(uint16_t id, KEY_VALUE (*get)(void), void *custom_data, uint16_t interval) {
+int8_t key_register(uint16_t id, KEY_VALUE (*get)(void), void *custom_data, uint16_t valid, uint16_t ageing) {
   if (key_list.num >= KEY_NUM_MAX) {
     return -1;
   }
@@ -50,10 +50,11 @@ int8_t key_register(uint16_t id, KEY_VALUE (*get)(void), void *custom_data, uint
     return -2;
   }
 
-  key_list.key[key_list.num].id = id;
-  key_list.key[key_list.num].interval = interval;
   key_list.key[key_list.num].status = KS_NONE;
   key_list.key[key_list.num].event = KE_NONE;
+  key_list.key[key_list.num].id = id;
+  key_list.key[key_list.num].valid = valid;
+  key_list.key[key_list.num].ageing = ageing;
   key_list.key[key_list.num].press_cnt = 0;
   key_list.key[key_list.num].release_cnt = 0;
   key_list.key[key_list.num].press_time = 0;
@@ -84,7 +85,7 @@ KEY_EVENT combo_key_event_check(KEY *key) {
     case KS_SHAKE: {
       if (key->get() == K_PRESS) {
         key->press_cnt += 1;
-        if (key->press_cnt > 20) {
+        if (key->press_cnt > key->valid) {
           key->press_time += 1;
           key->status = KS_PRESS;
           if (key->press_time == 1) {
@@ -100,7 +101,7 @@ KEY_EVENT combo_key_event_check(KEY *key) {
     case KS_PRESS: {
       if (key->get() == K_PRESS) {
         key->press_cnt += 1;
-        if (key->press_cnt == key->interval) {
+        if (key->press_cnt == key->ageing) {
           key->event = KE_LONG_PRESS;
         }
       } else {
@@ -109,7 +110,7 @@ KEY_EVENT combo_key_event_check(KEY *key) {
       }
     } break;
     case KS_RELEASE: {
-      if (key->press_cnt >= key->interval) {
+      if (key->press_cnt >= key->ageing) {
         key->event = KE_LONG_RELEASE;
         key->status = KS_NONE;
         break;
@@ -120,7 +121,7 @@ KEY_EVENT combo_key_event_check(KEY *key) {
         key->status = KS_SHAKE;
       } else {
         key->release_cnt += 1;
-        if (key->release_cnt == key->interval) {
+        if (key->release_cnt == key->ageing) {
           if (key->release_time == 1) {
             key->event = KE_RELEASE;
           }

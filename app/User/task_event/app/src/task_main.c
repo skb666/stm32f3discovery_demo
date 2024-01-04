@@ -206,8 +206,7 @@ static KEY_VALUE getKey(void) {
 
 void key_scan_init(void) {
   task_event_subscribe(EVENT_TYPE_TICK_1MS, TASK_ID_KEY_SCAN);
-
-  key_register(0, getKey, NULL, 300);
+  key_register(0, getKey, NULL, 20, 300);
 }
 
 static void key_scan_cb(EVENT *ev) {
