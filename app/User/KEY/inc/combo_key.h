@@ -49,7 +49,8 @@ typedef struct {
 KEY *key_list_get(int *num);
 KEY *key_find_by_id(int id);
 KEY_EVENT key_event_get(KEY *key);
-int key_combo_count(KEY *key);
+int key_combo_press_count(KEY *key);
+int key_combo_release_count(KEY *key);
 
 int8_t key_register(uint16_t id, KEY_VALUE (*get)(void), void *custom_data, uint16_t valid, uint16_t ageing);
 KEY_EVENT combo_key_event_check(KEY *key);

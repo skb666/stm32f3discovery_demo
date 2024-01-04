@@ -179,10 +179,10 @@ static void debug_print_cb(EVENT *ev) {
       printf_dbg("[KEY]: RELEASE\n");
     } break;
     case EVENT_TYPE_KEY_LONG_PRESS: {
-      printf_dbg("[KEY]: LONG_PRESS\n");
+      printf_dbg("[KEY]: LONG_PRESS %hu\n", (size_t)ev->custom_data);
     } break;
     case EVENT_TYPE_KEY_LONG_RELEASE: {
-      printf_dbg("[KEY]: LONG_RELEASE\n");
+      printf_dbg("[KEY]: LONG_RELEASE %hu\n", (size_t)ev->custom_data);
     } break;
     case EVENT_TYPE_KEY_COMBO: {
       printf_dbg("[KEY]: COMBO %hu\n", (size_t)ev->custom_data);
@@ -229,16 +229,16 @@ static void key_scan_cb(EVENT *ev) {
             task_event_publish(EVENT_TYPE_KEY_RELEASE, NULL, 0);
           } break;
           case KE_LONG_PRESS: {
-            task_event_publish(EVENT_TYPE_KEY_LONG_PRESS, NULL, 0);
+            task_event_publish(EVENT_TYPE_KEY_LONG_PRESS, (void *)(size_t)key_combo_release_count(&key_list[i]), 0);
           } break;
           case KE_LONG_RELEASE: {
-            task_event_publish(EVENT_TYPE_KEY_LONG_RELEASE, NULL, 0);
+            task_event_publish(EVENT_TYPE_KEY_LONG_RELEASE, (void *)(size_t)key_combo_release_count(&key_list[i]), 0);
           } break;
           case KE_COMBO: {
-            task_event_publish(EVENT_TYPE_KEY_COMBO, (void *)(size_t)key_combo_count(&key_list[i]), 0);
+            task_event_publish(EVENT_TYPE_KEY_COMBO, (void *)(size_t)key_combo_press_count(&key_list[i]), 0);
           } break;
           case KE_COMBO_RELEASE: {
-            task_event_publish(EVENT_TYPE_KEY_COMBO_RELEASE, (void *)(size_t)key_combo_count(&key_list[i]), 0);
+            task_event_publish(EVENT_TYPE_KEY_COMBO_RELEASE, (void *)(size_t)key_combo_press_count(&key_list[i]), 0);
           } break;
           default: {
           } break;
