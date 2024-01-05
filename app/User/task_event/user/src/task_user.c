@@ -28,7 +28,7 @@ static TASK s_task_list[] = {
     {
         .id = TASK_ID_KEY_SCAN,
         .times = -1,
-        .delay = 0,
+        .delay = 1,
         .init = key_scan_init,
         .handle = key_scan_handle,
     },

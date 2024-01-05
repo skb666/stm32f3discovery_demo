@@ -33,6 +33,7 @@
 #include "i2c_slave.h"
 #include "param.h"
 #include "task.h"
+#include "update.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -78,8 +79,9 @@ void USB_Reset(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(DP_GPIO_Port, &GPIO_InitStruct);
   
+  LL_mDelay(25);
   LL_GPIO_ResetOutputPin(DP_GPIO_Port, DP_Pin);
-  LL_mDelay(10);
+  LL_mDelay(25);
   LL_GPIO_SetOutputPin(DP_GPIO_Port, DP_Pin);
 }
 /* USER CODE END 0 */
@@ -125,9 +127,12 @@ int main(void)
   uart_config(DEV_USART1);
   uart_config(DEV_USART3);
   i2c_slave_config();
-  LL_mDelay(800);
+  LL_mDelay(750);
   sys_param_init();
   task_init();
+
+  boot_test();
+  LL_IWDG_ReloadCounter(IWDG);
   /* USER CODE END 2 */
 
   /* Infinite loop */

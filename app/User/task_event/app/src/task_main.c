@@ -209,8 +209,8 @@ static KEY_VALUE getKey(void) {
 }
 
 void key_scan_init(void) {
-  task_event_subscribe(EVENT_TYPE_TICK_1MS, TASK_ID_KEY_SCAN);
-  key_register(0, getKey, NULL, 20, 300);
+  task_event_subscribe(EVENT_TYPE_TICK_5MS, TASK_ID_KEY_SCAN);
+  key_register(0, getKey, NULL, 5, 65);
 }
 
 static void key_scan_cb(EVENT *ev) {
@@ -218,7 +218,7 @@ static void key_scan_cb(EVENT *ev) {
   int num;
 
   switch (ev->type) {
-    case EVENT_TYPE_TICK_1MS: {
+    case EVENT_TYPE_TICK_5MS: {
       key_list = key_list_get(&num);
       for (int i = 0; i < num; ++i) {
         switch (combo_key_event_check(&key_list[i])) {
@@ -244,6 +244,7 @@ static void key_scan_cb(EVENT *ev) {
           } break;
         }
       }
+      task_delay_ms(TASK_ID_KEY_SCAN, 5);
     } break;
     default: {
     } break;

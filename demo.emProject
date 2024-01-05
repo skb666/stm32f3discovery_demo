@@ -160,6 +160,7 @@
         <file file_name="../User/other/src/onchip_flash.c" />
         <file file_name="../User/other/src/param.c" />
         <file file_name="../User/other/src/uart_control.c" />
+        <file file_name="../User/other/src/update.c" />
       </folder>
       <folder Name="RING_FIFO">
         <file file_name="../User/RING_FIFO/src/ring_fifo.c" />

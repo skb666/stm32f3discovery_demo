@@ -10,6 +10,13 @@ static TIMER s_timer_list[] = {
         .times = -1,
     },
     {
+        .event_type = EVENT_TYPE_TICK_5MS,
+        .priority = 0,
+        .reload = TICK_5MS,
+        .tick = TICK_5MS,
+        .times = -1,
+    },
+    {
         .event_type = EVENT_TYPE_TICK_25MS,
         .priority = 0,
         .reload = TICK_25MS,
