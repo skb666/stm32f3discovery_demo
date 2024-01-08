@@ -102,6 +102,11 @@ KEY_EVENT combo_key_event_check(KEY *key) {
           }
         }
       } else {
+        if (key->release_time == 1) {
+          key->event = KE_RELEASE;
+        } else if (key->release_time > 1) {
+          key->event = KE_COMBO_RELEASE;
+        }
         key->status = KS_NONE;
       }
     } break;
@@ -128,7 +133,7 @@ KEY_EVENT combo_key_event_check(KEY *key) {
         key->status = KS_SHAKE;
       } else {
         key->release_cnt += 1;
-        if (key->release_cnt == key->ageing) {
+        if (key->release_cnt >= key->ageing) {
           if (key->release_time == 1) {
             key->event = KE_RELEASE;
           } else {

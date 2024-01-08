@@ -161,34 +161,34 @@ static void (*usb_monitor(DEV_TYPE dev_type, DATA_FROM data_from))(uint8_t *, ui
 
 /* 调试信息打印 */
 void debug_print_init(void) {
-  task_event_subscribe(EVENT_TYPE_KEY_PRESS, TASK_ID_DEBUG_PRINT);
+  // task_event_subscribe(EVENT_TYPE_KEY_PRESS, TASK_ID_DEBUG_PRINT);
   task_event_subscribe(EVENT_TYPE_KEY_RELEASE, TASK_ID_DEBUG_PRINT);
   task_event_subscribe(EVENT_TYPE_KEY_LONG_PRESS, TASK_ID_DEBUG_PRINT);
-  task_event_subscribe(EVENT_TYPE_KEY_LONG_RELEASE, TASK_ID_DEBUG_PRINT);
-  task_event_subscribe(EVENT_TYPE_KEY_COMBO, TASK_ID_DEBUG_PRINT);
+  // task_event_subscribe(EVENT_TYPE_KEY_LONG_RELEASE, TASK_ID_DEBUG_PRINT);
+  // task_event_subscribe(EVENT_TYPE_KEY_COMBO, TASK_ID_DEBUG_PRINT);
   task_event_subscribe(EVENT_TYPE_KEY_COMBO_RELEASE, TASK_ID_DEBUG_PRINT);
 }
 
 static void debug_print_cb(EVENT *ev) {
   switch (ev->type) {
     case EVENT_TYPE_KEY_PRESS: {
-      printf_dbg("[KEY]: PRESS\n");
-      change_sys_status();
+      usb_printf("[KEY]: PRESS\r\n");
     } break;
     case EVENT_TYPE_KEY_RELEASE: {
-      printf_dbg("[KEY]: RELEASE\n");
+      usb_printf("[KEY]: RELEASE\r\n");
+      change_sys_status();
     } break;
     case EVENT_TYPE_KEY_LONG_PRESS: {
-      printf_dbg("[KEY]: LONG_PRESS %hu\n", (size_t)ev->custom_data);
+      usb_printf("[KEY]: LONG_PRESS %hu\r\n", (size_t)ev->custom_data);
     } break;
     case EVENT_TYPE_KEY_LONG_RELEASE: {
-      printf_dbg("[KEY]: LONG_RELEASE %hu\n", (size_t)ev->custom_data);
+      usb_printf("[KEY]: LONG_RELEASE %hu\r\n", (size_t)ev->custom_data);
     } break;
     case EVENT_TYPE_KEY_COMBO: {
-      printf_dbg("[KEY]: COMBO %hu\n", (size_t)ev->custom_data);
+      usb_printf("[KEY]: COMBO %hu\r\n", (size_t)ev->custom_data);
     } break;
     case EVENT_TYPE_KEY_COMBO_RELEASE: {
-      printf_dbg("[KEY]: COMBO_RELEASE %hu\n", (size_t)ev->custom_data);
+      usb_printf("[KEY]: COMBO_RELEASE %hu\r\n", (size_t)ev->custom_data);
     } break;
     default: {
     } break;
@@ -210,7 +210,7 @@ static KEY_VALUE getKey(void) {
 
 void key_scan_init(void) {
   task_event_subscribe(EVENT_TYPE_TICK_5MS, TASK_ID_KEY_SCAN);
-  key_register(0, getKey, NULL, 5, 65);
+  key_register(0, getKey, NULL, 4, 75);
 }
 
 static void key_scan_cb(EVENT *ev) {
