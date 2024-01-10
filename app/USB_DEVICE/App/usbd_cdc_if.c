@@ -403,13 +403,13 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 }
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
-void usb_tx_trans(void)
+int8_t usb_tx_trans(void)
 {
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
   NUM_TYPE length = 0;
 
   if (hcdc->TxState != 0){
-    return;
+    return -1;
   }
 
   if (!ring_is_empty(&usb_tx_buffer))
@@ -420,8 +420,10 @@ void usb_tx_trans(void)
     ring_pop_mult(&usb_tx_buffer, UserTxBufferFS, length);
     enable_global_irq();
 
-    CDC_Transmit_FS(UserTxBufferFS, length);
+    return CDC_Transmit_FS(UserTxBufferFS, length);
   }
+
+  return 0;
 }
 
 void usb_printf(const char *format, ...)
@@ -447,10 +449,11 @@ void usb_printf(const char *format, ...)
       return;
     }
 
-    usb_tx_trans();
-    while (hcdc->TxState != 0){
+    if (usb_tx_trans()) {
+      // 防死机，可能会丢数据
       return;
     }
+
     pbuf += success;
     length -= success;
   } while (length);
@@ -473,10 +476,11 @@ void usb_puts(uint8_t* buf, uint16_t len)
       return;
     }
 
-    usb_tx_trans();
-    while (hcdc->TxState != 0){
+    if (usb_tx_trans()) {
+      // 防死机，可能会丢数据
       return;
     }
+
     pbuf += success;
     len -= success;
   } while (len);
@@ -488,7 +492,7 @@ void usb_putchar(const char ch)
   tx_buffer[0] = ch;
 
   if (ring_is_full(&usb_tx_buffer)) {
-    usb_tx_trans();
+    (void)usb_tx_trans();
   }
   
   disable_global_irq();

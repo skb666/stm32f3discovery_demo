@@ -270,7 +270,7 @@ static void timer_1ms_cb(EVENT *ev) {
       uart_tx_poll(DEV_USART1);
       uart_tx_poll(DEV_USART3);
       // usb cdc 发送
-      usb_tx_trans();
+      (void)usb_tx_trans();
     } break;
     default: {
     } break;

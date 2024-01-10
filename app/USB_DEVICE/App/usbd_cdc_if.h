@@ -112,7 +112,7 @@ void usb_printf(const char *format, ...);
 void usb_puts(uint8_t* buf, uint16_t len);
 void usb_putchar(const char ch);
 int8_t usb_rx_get(uint8_t *ch);
-void usb_tx_trans(void);
+int8_t usb_tx_trans(void);
 /* USER CODE END EXPORTED_FUNCTIONS */
 
 /**
