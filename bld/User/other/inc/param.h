@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 typedef struct {
+  uint16_t need_process;
   uint16_t stage;
   uint16_t status;
 } UPDATE_CTRL;

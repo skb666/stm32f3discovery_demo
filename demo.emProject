@@ -208,7 +208,7 @@
       arm_target_device_name="STM32F303VC"
       arm_target_interface_type="SWD"
       c_preprocessor_definitions="ARM_MATH_CM4;STM32F303xC;__STM32F303_SUBFAMILY;__STM32F3XX_FAMILY;USE_FULL_LL_DRIVER;USE_HAL_DRIVER"
-      c_user_include_directories="$(ProjectDir)/STM32F3xx/Device/Include;$(ProjectDir)/../Drivers/CMSIS/Include;$(ProjectDir)/../Drivers/CMSIS/Device/ST/STM32F3xx/Include;$(ProjectDir)/../Drivers/STM32F3xx_HAL_Driver/Inc;$(ProjectDir)/../Drivers/STM32F3xx_HAL_Driver/Inc/Legacy;$(ProjectDir)/../Core/Inc;$(ProjectDir)/../User/RING_FIFO/inc;$(ProjectDir)/../User/task_event/core/inc;$(ProjectDir)/../User/task_event/user/inc;$(ProjectDir)/../User/task_event/app/inc;$(ProjectDir)/../User/other/inc"
+      c_user_include_directories="$(ProjectDir)/STM32F3xx/Device/Include;$(ProjectDir)/../Drivers/CMSIS/Include;$(ProjectDir)/../Drivers/CMSIS/Device/ST/STM32F3xx/Include;$(ProjectDir)/../Drivers/STM32F3xx_HAL_Driver/Inc;$(ProjectDir)/../Drivers/STM32F3xx_HAL_Driver/Inc/Legacy;$(ProjectDir)/../Core/Inc;$(ProjectDir)/../User/RING_FIFO/inc;$(ProjectDir)/../User/task_event/core/inc;$(ProjectDir)/../User/task_event/user/inc;$(ProjectDir)/../User/task_event/app/inc;$(ProjectDir)/../User/other/inc;$(ProjectDir)/../User/libcrc/crc32_mpeg2"
       debug_register_definition_file="$(ProjectDir)/STM32F30x_Registers.xml"
       debug_stack_pointer_start="__stack_end__"
       debug_start_from_entry_point_symbol="Yes"
@@ -272,6 +272,11 @@
       <file file_name="STM32F3xx/Source/STM32F3xx_Startup.s" />
     </folder>
     <folder Name="User">
+      <folder Name="libcrc">
+        <folder Name="crc32_mpeg32">
+          <file file_name="../User/libcrc/crc32_mpeg2/crc32_mpeg2.c" />
+        </folder>
+      </folder>
       <folder Name="other">
         <file file_name="../User/other/src/device.c" />
         <file file_name="../User/other/src/onchip_flash.c" />

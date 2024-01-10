@@ -38,9 +38,12 @@
   <ProjectSessionItem path="demo;stm32f3-bld"/>
   <ProjectSessionItem path="demo;stm32f3-bld;Core"/>
   <ProjectSessionItem path="demo;stm32f3-bld;User"/>
+  <ProjectSessionItem path="demo;stm32f3-bld;User;libcrc"/>
+  <ProjectSessionItem path="demo;stm32f3-bld;User;libcrc;crc32_mpeg32"/>
   <ProjectSessionItem path="demo;stm32f3-bld;User;other"/>
   <ProjectSessionItem path="demo;stm32f3-bld;User;task_event"/>
   <ProjectSessionItem path="demo;stm32f3-bld;User;task_event;app"/>
+  <ProjectSessionItem path="demo;stm32f3-bld;User;task_event;core"/>
   <ProjectSessionItem path="demo;stm32f3-bld;User;task_event;user"/>
  </Project>
  <Register1>
@@ -87,9 +90,6 @@
  <Watch4>
   <Watches active="0" update="Never"/>
  </Watch4>
- <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="39" y="246" useTextEdit="1" path="app/User/task_event/app/src/task_main.c" left="0" top="222" codecName="UTF-8"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="16" y="94" useTextEdit="1" path="bld/Core/Src/main.c" left="0" selected="1" top="58" codecName="UTF-8"/>
- </Files>
- <EMStudioWindow activeProject="stm32f3-bld" fileDialogDefaultFilter="*.c" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="D:/work/stm32f3discovery_demo/app/User/other/src" debugSearchPath="" autoConnectCapabilities="1343"/>
+ <Files/>
+ <EMStudioWindow activeProject="stm32f3-bld" fileDialogDefaultFilter="*.c" autoConnectTarget="GDB Server" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="D:/work/stm32f3discovery_demo/bld/User/libcrc/crc32_mpeg2" debugSearchPath="" autoConnectCapabilities="1343"/>
 </session>
