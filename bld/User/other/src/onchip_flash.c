@@ -19,7 +19,7 @@ int8_t STMFLASH_Read(const uint32_t ReadAddr, uint16_t *pBuffer, uint32_t Num) {
   addrx = ReadAddr;
   addr_end = ReadAddr + Num * 2;
 
-  if (addrx < STMFLASH_BASE || addr_end >= STMFLASH_END || addrx % 2) {
+  if (addrx < STMFLASH_BASE || addr_end > STMFLASH_END || addrx % 2) {
     return -1;  // 非法地址
   }
 
@@ -40,7 +40,7 @@ int8_t STMFLASH_Write(uint32_t WriteAddr, uint16_t *pBuffer, uint32_t Num) {
   addrx = WriteAddr;               // 写入的起始地址
   addr_end = WriteAddr + Num * 2;  // 写入的结束地址
 
-  if (addrx < STMFLASH_BASE || addr_end >= STMFLASH_END || addrx % 2) {
+  if (addrx < STMFLASH_BASE || addr_end > STMFLASH_END || addrx % 2) {
     return -1;  // 非法地址
   }
 
@@ -72,7 +72,7 @@ int8_t STMFLASH_Erase(uint32_t addrx, uint32_t length, uint32_t retry) {
   HAL_StatusTypeDef status = HAL_OK;
   uint32_t addr_end = addrx + length;
 
-  if (addrx < STMFLASH_BASE || addr_end >= STMFLASH_END) {
+  if (addrx < STMFLASH_BASE || addr_end > STMFLASH_END) {
     return -1;  // 非法地址
   }
 
