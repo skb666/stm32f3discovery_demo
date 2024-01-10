@@ -4,12 +4,12 @@
 #include "i2c_slave.h"
 #include "param.h"
 
-#define I2C_PUT_NUM(Type, Value)                          \
-  do {                                                    \
-    uint8_t __data;                                       \
-    Type __value = Value;                                 \
-    change_byte_order((uint8_t *)&__value, sizeof(Type)); \
-    i2c_slave_tx_put((uint8_t *)&__value, sizeof(Type));  \
+#define I2C_PUT_NUM(Type, Value)                         \
+  do {                                                   \
+    uint8_t __data;                                      \
+    Type __value = Value;                                \
+    change_byte_order(&__value, sizeof(Type));           \
+    i2c_slave_tx_put((uint8_t *)&__value, sizeof(Type)); \
   } while (0)
 
 #define I2C_GET_NUM(Type, Value)                \

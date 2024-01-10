@@ -23,7 +23,7 @@ void reset_global_irq(void);
 void disable_global_irq(void);
 void enable_global_irq(void);
 
-void change_byte_order(uint8_t *addr, size_t size);
+void change_byte_order(void *ptr, size_t size);
 
 #ifdef __cplusplus
 }

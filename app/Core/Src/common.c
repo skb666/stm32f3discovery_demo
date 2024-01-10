@@ -25,8 +25,9 @@ void enable_global_irq(void) {
   return;
 }
 
-void change_byte_order(uint8_t *addr, size_t size) {
+void change_byte_order(void *ptr, size_t size) {
   uint8_t tmp;
+  uint8_t *addr = (uint8_t *)ptr;
   size_t i, imax = size / 2;
 
   for (i = 0; i < imax; ++i) {

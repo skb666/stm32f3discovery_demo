@@ -127,6 +127,8 @@ void uart_config(DEV_TYPE dev_type) {
       .size = 0,
   };
 
+  // 默认按大端方式传输数据
+  rx_frame[dev_type].byte_order = 1;
   rx_frame[dev_type].data = __frame_data[dev_type];
 }
 
@@ -340,7 +342,7 @@ void uart_frame_parse(DEV_TYPE dev_type) {
       }
       if (rx_frame[dev_type].recv_size >= sizeof(rx_frame[dev_type].length)) {
         if (rx_frame[dev_type].byte_order) {
-          change_byte_order((uint8_t *)&rx_frame[dev_type].length, sizeof(rx_frame[dev_type].length));
+          change_byte_order(&rx_frame[dev_type].length, sizeof(rx_frame[dev_type].length));
         }
         if (rx_frame[dev_type].length > FRAME_DATA_LEN_MAX) {
           printf_dbg("frame length error!!! (%hu)\n", rx_frame[dev_type].length);
@@ -383,9 +385,9 @@ void uart_printf(DEV_TYPE dev_type, const char *format, ...) {
   do {
     success = uart_write(dev_type, pbuf, length);
 
-    if (success == length) {
-      return;
-    }
+    // if (success == length) {
+    //   return;
+    // }
 
     uart_tx_poll(dev_type);
     uart_wait_tx(dev_type);
@@ -403,9 +405,9 @@ void uart_puts(DEV_TYPE dev_type, uint8_t *buf, uint16_t len) {
   do {
     success = uart_write(dev_type, pbuf, len);
 
-    if (success == len) {
-      return;
-    }
+    // if (success == len) {
+    //   return;
+    // }
 
     uart_tx_poll(dev_type);
     uart_wait_tx(dev_type);
