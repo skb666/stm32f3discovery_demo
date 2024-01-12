@@ -173,7 +173,8 @@ void uart_dmatx_done_isr(DEV_TYPE dev_type) {
 }
 
 void uart_wait_tx(DEV_TYPE dev_type) {
-  while (!uart_dev[dev_type].status) {
+  if (!uart_dev[dev_type].status) {
+    return;
   }
   while (uart_dev[dev_type].status) {
   }
