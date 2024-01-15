@@ -206,11 +206,16 @@ void uart_dmatx_done_isr(DEV_TYPE dev_type) {
   uart_dev[dev_type].status = 0; /* DMA发送空闲 */
 }
 
-void uart_wait_tx(DEV_TYPE dev_type) {
+void uart_wait_tx(DEV_TYPE dev_type, uint32_t timeout) {
   if (!uart_dev[dev_type].status) {
     return;
   }
   while (uart_dev[dev_type].status) {
+    if (LL_SYSTICK_IsActiveCounterFlag()) {
+      if (timeout-- == 0) {
+        return;
+      }
+    }
   }
 }
 
@@ -391,7 +396,7 @@ void uart_printf(DEV_TYPE dev_type, const char *format, ...) {
     // }
 
     uart_tx_poll(dev_type);
-    uart_wait_tx(dev_type);
+    uart_wait_tx(dev_type, 50);
     pbuf += success;
     length -= success;
   } while (length);
@@ -411,7 +416,7 @@ void uart_puts(DEV_TYPE dev_type, uint8_t *buf, uint16_t len) {
     // }
 
     uart_tx_poll(dev_type);
-    uart_wait_tx(dev_type);
+    uart_wait_tx(dev_type, 50);
     pbuf += success;
     len -= success;
   } while (len);

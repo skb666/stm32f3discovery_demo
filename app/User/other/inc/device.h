@@ -45,7 +45,7 @@ void uart_set_tx_monitor(DEV_TYPE dev_type, void (*monitor)(uint8_t *, uint16_t)
 int8_t frame_parse_register(DEV_TYPE dev_type, uint8_t index, void (*func)(frame_parse_t *));
 void uart_frame_parse(DEV_TYPE dev_type);
 
-void uart_wait_tx(DEV_TYPE dev_type);
+void uart_wait_tx(DEV_TYPE dev_type, uint32_t timeout);
 void uart_tx_poll(DEV_TYPE dev_type);
 uint16_t uart_read(DEV_TYPE dev_type, uint8_t *buf, uint16_t size);
 uint16_t uart_write(DEV_TYPE dev_type, const uint8_t *buf, uint16_t size);
