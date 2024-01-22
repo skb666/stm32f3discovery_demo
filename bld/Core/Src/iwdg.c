@@ -37,7 +37,7 @@ void MX_IWDG_Init(void)
   /* USER CODE END IWDG_Init 1 */
   LL_IWDG_Enable(IWDG);
   LL_IWDG_EnableWriteAccess(IWDG);
-  LL_IWDG_SetPrescaler(IWDG, LL_IWDG_PRESCALER_64);
+  LL_IWDG_SetPrescaler(IWDG, LL_IWDG_PRESCALER_256);
   LL_IWDG_SetReloadCounter(IWDG, 3125);
   while (LL_IWDG_IsReady(IWDG) != 1)
   {

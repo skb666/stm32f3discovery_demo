@@ -135,12 +135,18 @@ static int8_t boot_param_save(uint32_t addr, BOOT_PARAM *param) {
 
   param->crc_val = param_crc_calc(param);
 
-  if (STMFLASH_Erase(addr, PART_SIZE_PARAM, 1)) {
+  disable_global_irq();
+  err = STMFLASH_Erase(addr, PART_SIZE_PARAM, 1);
+  enable_global_irq();
+  if (err) {
     printf_dbg("ERROR: Flash Erase\r\n");
     return -1;
   }
 
-  if (STMFLASH_Write(addr, (uint16_t *)param, boot_param_size16)) {
+  disable_global_irq();
+  err = STMFLASH_Write(addr, (uint16_t *)param, boot_param_size16);
+  enable_global_irq();
+  if (err) {
     printf_dbg("ERROR: Flash Write\r\n");
     return -2;
   }
@@ -221,19 +227,22 @@ static int8_t load_app_from_backup(void) {
   uint32_t addr_write = ADDR_BASE_APP;
   uint32_t addr_read = ADDR_BASE_APP_BAK;
 
+  disable_global_irq();
   err = STMFLASH_Erase(ADDR_BASE_APP, PART_SIZE_APP, 1);
+  enable_global_irq();
   if (err) {
     return err;
   }
 
   while (addr_write < ADDR_BASE_APP_BAK) {
-    (void)STMFLASH_Read(addr_read, buf, 512);
-    err = STMFLASH_Write(addr_write, buf, 512);
-    if (err) {
-      return err;
+    (void)STMFLASH_Read(addr_read, buf, sizeof(buf) >> 1);
+    disable_global_irq();
+    err = STMFLASH_Write(addr_write, buf, sizeof(buf) >> 1);
+    enable_global_irq();
+    if (!err) {
+      addr_read += sizeof(buf);
+      addr_write += sizeof(buf);
     }
-    addr_read += 1024;
-    addr_write += 1024;
   }
 
   return 0;
@@ -453,10 +462,14 @@ void update_frame_parse(frame_parse_t *frame) {
   }
 
   /* 升级包准备好后置位 */
+  disable_global_irq();
   sys->ctrl.update.need_process = 1;
+  enable_global_irq();
 }
 
 static void update_init(SYS_PARAM *sys) {
+  int8_t err = 0;
+
   sys->ctrl.update.stage = UPDATE_BEGIN;
   sys->ctrl.update.status = 0x1FFF;
   /* 清零升级过程数据 */
@@ -464,7 +477,10 @@ static void update_init(SYS_PARAM *sys) {
   (void)CRC_OPT(crc32_mpeg2, init)(&s_update_info.crc);
   boot_param_get(&s_update_info.boot_param);
   /* 擦除 APP 接收区域 */
-  if (STMFLASH_Erase(ADDR_BASE_APP_BAK, PART_SIZE_APP, 1)) {
+  disable_global_irq();
+  err = STMFLASH_Erase(ADDR_BASE_APP_BAK, PART_SIZE_APP, 1);
+  enable_global_irq();
+  if (err) {
     /* 理论上不应该发生 */
     printf_dbg("![impossible] update_init\r\n");
     ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_FLASH_WR;
@@ -479,6 +495,7 @@ static void update_reset(SYS_PARAM *sys) {
 void update_pkg_process(void) {
   SYS_PARAM *sys = sys_param_get();
   uint32_t pkg_crc;
+  int8_t err = 0;
 
   if (!sys->ctrl.update.need_process) {
     return;
@@ -505,10 +522,10 @@ void update_pkg_process(void) {
         } break;
         case PKG_TYPE_HEAD: {
           sys->ctrl.update.status = 0x1000;
-          s_update_info.file_crc = s_update_pkg.head->file_crc;
-          s_update_info.file_size_real = s_update_pkg.head->file_size_real;
-          s_update_info.data_size_one = s_update_pkg.head->data_size_one;
-          s_update_info.pkg_num_total = s_update_pkg.head->pkg_num_total;
+          memcpy(&s_update_info.file_crc, &s_update_pkg.head->file_crc, sizeof(s_update_info.file_crc));
+          memcpy(&s_update_info.file_size_real, &s_update_pkg.head->file_size_real, sizeof(s_update_info.file_size_real));
+          memcpy(&s_update_info.data_size_one, &s_update_pkg.head->data_size_one, sizeof(s_update_info.data_size_one));
+          memcpy(&s_update_info.pkg_num_total, &s_update_pkg.head->pkg_num_total, sizeof(s_update_info.pkg_num_total));
           /* 检查升级包数量 */
           if (s_update_info.pkg_num_total >= 0xFFE) {
             ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_PKG_NUM;
@@ -564,9 +581,12 @@ void update_pkg_process(void) {
             break;
           }
           /* 向 Flash 写入数据 */
-          if (STMFLASH_Write((ADDR_BASE_APP_BAK + s_update_info.recv_len),
-                  (uint16_t *)s_update_pkg.data->data,
-                  (s_update_pkg.data->data_len + (s_update_pkg.data->data_len % 2)))) {
+          disable_global_irq();
+          err = STMFLASH_Write((ADDR_BASE_APP_BAK + s_update_info.recv_len),
+              (uint16_t *)s_update_pkg.data->data,
+              (s_update_pkg.data->data_len / 2 + !!(s_update_pkg.data->data_len % 2)));
+          enable_global_irq();
+          if (err) {
             /* 理论上不应该发生 */
             printf_dbg("![impossible] PKG_TYPE_DATA\r\n");
             ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_FLASH_WR;
@@ -612,6 +632,7 @@ void update_pkg_process(void) {
             break;
           }
           /* 更新引导参数 */
+          s_update_info.boot_param.update_needed = 0;
           s_update_info.boot_param.app_status = STATUS_BOOT;
           if (boot_param_update(&s_update_info.boot_param)) {
             /* 理论上不应该发生 */
@@ -652,5 +673,7 @@ void update_pkg_process(void) {
   }
 
   /* 升级包处理完成后复位 */
+  disable_global_irq();
   sys->ctrl.update.need_process = 0;
+  enable_global_irq();
 }

@@ -93,9 +93,9 @@ int8_t STMFLASH_Erase(uint32_t addrx, uint32_t length, uint32_t retry) {
   __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_WRPERR | FLASH_FLAG_PGERR | FLASH_FLAG_BSY);
 
   do {
-    FlashEraseInit.TypeErase = FLASH_TYPEERASE_PAGES;                                       // 擦除类型，页擦除
-    FlashEraseInit.PageAddress = PageError;                                                 // 要擦除的页
-    FlashEraseInit.NbPages = STMFLASH_GetPage(addr_end) - STMFLASH_GetPage(PageError) + 1;  // 擦除页数
+    FlashEraseInit.TypeErase = FLASH_TYPEERASE_PAGES;                                   // 擦除类型，页擦除
+    FlashEraseInit.PageAddress = PageError;                                             // 要擦除的页
+    FlashEraseInit.NbPages = STMFLASH_GetPage(addr_end) - STMFLASH_GetPage(PageError);  // 擦除页数
 
     status = HAL_FLASHEx_Erase(&FlashEraseInit, &PageError);
   } while ((status != HAL_OK) && (retry--));

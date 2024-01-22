@@ -71,7 +71,7 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  SCB->VTOR = ADDR_BASE_BLD;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/

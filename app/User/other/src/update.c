@@ -120,12 +120,18 @@ static int8_t boot_param_save(uint32_t addr, BOOT_PARAM *param) {
 
   param->crc_val = param_crc_calc(param);
 
-  if (STMFLASH_Erase(addr, PART_SIZE_PARAM, 1)) {
+  disable_global_irq();
+  err = STMFLASH_Erase(addr, PART_SIZE_PARAM, 1);
+  enable_global_irq();
+  if (err) {
     printf_dbg("ERROR: Flash Erase\r\n");
     return -1;
   }
 
-  if (STMFLASH_Write(addr, (uint16_t *)param, boot_param_size16)) {
+  disable_global_irq();
+  err = STMFLASH_Write(addr, (uint16_t *)param, boot_param_size16);
+  enable_global_irq();
+  if (err) {
     printf_dbg("ERROR: Flash Write\r\n");
     return -2;
   }
@@ -149,7 +155,11 @@ static int8_t boot_param_update(BOOT_PARAM *param) {
   return 0;
 }
 
-static int8_t boot_param_get(BOOT_PARAM *pdata) {
+static void boot_param_get(BOOT_PARAM *pdata) {
+  (void)STMFLASH_Read(ADDR_BASE_PARAM, (uint16_t *)pdata, boot_param_size16);
+}
+
+static int8_t boot_param_get_with_check(BOOT_PARAM *pdata) {
   BOOT_PARAM param, param_bak;
 
   (void)STMFLASH_Read(ADDR_BASE_PARAM, (uint16_t *)&param, boot_param_size16);
@@ -202,19 +212,22 @@ static int8_t load_app_from_backup(void) {
   uint32_t addr_write = ADDR_BASE_APP;
   uint32_t addr_read = ADDR_BASE_APP_BAK;
 
+  disable_global_irq();
   err = STMFLASH_Erase(ADDR_BASE_APP, PART_SIZE_APP, 1);
+  enable_global_irq();
   if (err) {
     return err;
   }
 
   while (addr_write < ADDR_BASE_APP_BAK) {
-    (void)STMFLASH_Read(addr_read, buf, 512);
-    err = STMFLASH_Write(addr_write, buf, 512);
-    if (err) {
-      return err;
+    (void)STMFLASH_Read(addr_read, buf, sizeof(buf) >> 1);
+    disable_global_irq();
+    err = STMFLASH_Write(addr_write, buf, sizeof(buf) >> 1);
+    enable_global_irq();
+    if (!err) {
+      addr_read += sizeof(buf);
+      addr_write += sizeof(buf);
     }
-    addr_read += 1024;
-    addr_write += 1024;
   }
 
   return 0;
@@ -253,7 +266,7 @@ void boot_param_check(void) {
   BOOT_PARAM param;
   uint32_t msp_addr;
 
-  if (boot_param_get(&param)) {
+  if (boot_param_get_with_check(&param)) {
     Error_Handler();
   }
 
@@ -366,4 +379,19 @@ void boot_test(void) {
 #endif
 
   boot_param_check();
+}
+
+int shell_update_cmd(int argc, char *argv[]) {
+  BOOT_PARAM param;
+
+  boot_param_get(&param);
+
+  param.update_needed = 1;
+  if (boot_param_update(&param)) {
+    Error_Handler();
+  }
+
+  NVIC_SystemReset();
+
+  return 0;
 }

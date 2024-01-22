@@ -20,7 +20,7 @@ if __name__ == "__main__":
         usage()
         exit(2)
 
-    portname = "COM5"
+    portname = "COM4"
     baudrate = 115200
     filename = "../app/emStudio/Output/Debug/Exe/stm32f3-app.bin"
 
@@ -170,13 +170,14 @@ if __name__ == "__main__":
 
     """ 升级文件数据包 """
     isok = update_data(file_crc, file_size_real, data_size_one, pkg_num_total)
+    time.sleep(1)
     if not isok:
         print("error: update_data")
         exit()
 
     """ 结束升级 """
     update_finish()
-    time.sleep(5)
+    time.sleep(10)
     (errno, running, pkg_num) = get_update_status()
     time.sleep(0.1)
     print(f"status: 0x{errno:04x}, 0x{running:04x}, 0x{pkg_num:04x}")
@@ -187,10 +188,6 @@ if __name__ == "__main__":
 
     """ 重启设备 """
     mcu_reboot()
-    time.sleep(1)
-    (errno, running, pkg_num) = get_update_status()
-    time.sleep(0.1)
-    print(f"status: 0x{errno:04x}, 0x{running:04x}, 0x{pkg_num:04x}")
 
     print("="*50)
     sr = SerialReceive(sercomm)

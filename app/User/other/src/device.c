@@ -182,6 +182,7 @@ void uart_dmarx_part_done_isr(DEV_TYPE dev_type) {
       recv_total_size = UART_DMARX_BUF_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_3);
     } break;
     default: {
+      return;
     } break;
   }
   recv_size = recv_total_size - uart_dev[dev_type].last_dmarx_size;
