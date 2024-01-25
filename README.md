@@ -6,8 +6,21 @@
 + USB-CDC shell
 + USB-CDC 透传 USART1/USART3
 + I2C 从机的中断方式实现（LL 库）
++ 串口升级协议调试
 + shell 实现:
 	- led 控制
 	- i2cdetect
 	- i2ctransfer
 	- usart 调试助手
+
+**cmake 编译方法**
+
+```bash
+cd bld
+cmake -G "Unix Makefiles" -H. -Bbuild -DCMAKE_TOOLCHAIN_FILE=toolchains.cmake
+cmake --build build -t all -- -j${nproc}
+
+cd app
+cmake -G "Unix Makefiles" -H. -Bbuild -DCMAKE_TOOLCHAIN_FILE=toolchains.cmake
+cmake --build build -t all -- -j${nproc}
+```
