@@ -59,6 +59,7 @@ User/xcmd/src/xcmd_ex_keys.c \
 User/other/src/device.c \
 User/other/src/param.c \
 User/other/src/update.c \
+User/other/src/update_interface.c \
 User/other/src/mycmd.c \
 User/other/src/led_control.c \
 User/other/src/uart_control.c \

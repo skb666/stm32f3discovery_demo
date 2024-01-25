@@ -162,6 +162,7 @@
         <file file_name="../User/other/src/param.c" />
         <file file_name="../User/other/src/uart_control.c" />
         <file file_name="../User/other/src/update.c" />
+        <file file_name="../User/other/src/update_interface.c" />
       </folder>
       <folder Name="RING_FIFO">
         <file file_name="../User/RING_FIFO/src/ring_fifo.c" />
@@ -285,6 +286,7 @@
         <file file_name="../User/other/src/device.c" />
         <file file_name="../User/other/src/param.c" />
         <file file_name="../User/other/src/update.c" />
+        <file file_name="../User/other/src/update_interface.c" />
       </folder>
       <folder Name="RING_FIFO">
         <file file_name="../User/RING_FIFO/src/ring_fifo.c" />

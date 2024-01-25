@@ -49,6 +49,7 @@ User/libcrc/crc32_mpeg2/crc32_mpeg2.c \
 User/other/src/device.c \
 User/other/src/param.c \
 User/other/src/update.c \
+User/other/src/update_interface.c \
 Core/Src/main.c \
 Core/Src/gpio.c \
 Core/Src/crc.c \

@@ -20,7 +20,7 @@ if __name__ == "__main__":
         usage()
         exit(2)
 
-    portname = "COM5"
+    portname = "COM4"
     baudrate = 115200
     # filename = "../app/emStudio/Output/Debug/Exe/stm32f3-app.bin"
     filename = "../app/build/stm32f3-app.bin"
@@ -50,9 +50,10 @@ if __name__ == "__main__":
     sercomm.used_port_info()
 
     frame_head = b'\x55\xaa'
-    frame_type_update_data = b'\x01'
-    frame_type_update_status = b'\x02'
-    frame_type_reboot = b'\x03'
+    frame_type_reboot = b'\x01'
+    frame_type_boot_app = b'\x02'
+    frame_type_update_data = b'\xf1'
+    frame_type_update_status = b'\xf2'
     pkg_type_init = struct.pack('>H', 0x1000)
     pkg_type_finish = struct.pack('>H', 0x0ffe)
     pkg_type_head= struct.pack('>H', 0x0001)
@@ -110,15 +111,13 @@ if __name__ == "__main__":
             print(f"pkg_num: {pkg_num_send:02d}, pkg_crc: 0x{pkg_crc:08x}")
             sercomm.write_raw(packed)
             time.sleep(1)
-            while True:
-                (errno, running, pkg_num) = get_update_status()
-                print(f"status: 0x{errno:04x}, 0x{running:04x}, 0x{pkg_num:04x}")
-                time.sleep(0.1)
-                if pkg_num == pkg_num_send:
-                    crc32_mpeg2_file.accumulate(update_data)
-                    pkg_num_send += 1
-                    pkg_data_seek += data_len
-                    break
+            (errno, running, pkg_num) = get_update_status()
+            print(f"status: 0x{errno:04x}, 0x{running:04x}, 0x{pkg_num:04x}")
+            time.sleep(0.1)
+            if pkg_num == pkg_num_send:
+                crc32_mpeg2_file.accumulate(update_data)
+                pkg_num_send += 1
+                pkg_data_seek += data_len
         print(f"file_crc: 0x{crc32_mpeg2_file.get():08x}")
         if file_size_real != pkg_data_seek or file_crc != crc32_mpeg2_file.get():
             return False
@@ -132,6 +131,11 @@ if __name__ == "__main__":
     def mcu_reboot():
         data = b''
         packed = frame_head + frame_type_reboot + struct.pack('>H', len(data)) + data
+        sercomm.write_raw(packed)
+
+    def boot_app():
+        data = b''
+        packed = frame_head + frame_type_boot_app + struct.pack('>H', len(data)) + data
         sercomm.write_raw(packed)
 
     print("="*50)
@@ -187,8 +191,11 @@ if __name__ == "__main__":
     else:
         print("failed")
 
+    """ 引导 APP """
+    boot_app()
+
     """ 重启设备 """
-    mcu_reboot()
+    # mcu_reboot()
 
     print("="*50)
     sr = SerialReceive(sercomm)
