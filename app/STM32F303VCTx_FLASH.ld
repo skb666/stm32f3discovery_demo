@@ -141,7 +141,7 @@ SECTIONS
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
-	*(.RAM1)
+    *(.RAM1)
     *(.RAM1*)
 
     . = ALIGN(4);
@@ -162,7 +162,7 @@ SECTIONS
     _sccmram = .;       /* create a global symbol at ccmram start */
     *(.ccmram)
     *(.ccmram*)
-	*(.CCM_RAM1)
+    *(.CCM_RAM1)
     *(.CCM_RAM1*)
     
     . = ALIGN(4);
