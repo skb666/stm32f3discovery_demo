@@ -5,6 +5,7 @@
 **/*.bin
 **/*.jflash
 **/*.lock
+**/*.emSession
 
 *.html
 .vscode
