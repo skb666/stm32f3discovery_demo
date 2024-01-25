@@ -6,7 +6,6 @@
 
 #define I2C_PUT_NUM(Type, Value)                         \
   do {                                                   \
-    uint8_t __data;                                      \
     Type __value = Value;                                \
     change_byte_order(&__value, sizeof(Type));           \
     i2c_slave_tx_put((uint8_t *)&__value, sizeof(Type)); \

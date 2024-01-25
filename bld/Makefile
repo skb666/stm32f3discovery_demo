@@ -20,9 +20,9 @@ TARGET = stm32f3-bld
 # building variables
 ######################################
 # debug build?
-DEBUG = 1
+DEBUG = 0
 # optimization
-OPT = -Og
+OPT = -std=gnu11 -Os
 
 
 #######################################
@@ -36,6 +36,19 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
+Core/Src/common.c \
+User/RING_FIFO/src/ring_fifo.c \
+User/FLASH/src/onchip_flash.c \
+User/task_event/core/src/event.c \
+User/task_event/core/src/task.c \
+User/task_event/core/src/timer.c \
+User/task_event/user/src/task_user.c \
+User/task_event/user/src/timer_user.c \
+User/task_event/app/src/task_main.c \
+User/libcrc/crc32_mpeg2/crc32_mpeg2.c \
+User/other/src/device.c \
+User/other/src/param.c \
+User/other/src/update.c \
 Core/Src/main.c \
 Core/Src/gpio.c \
 Core/Src/crc.c \
@@ -128,6 +141,12 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  \
+-IUser/RING_FIFO/inc \
+-IUser/FLASH/inc \
+-IUser/task_event/core/inc \
+-IUser/task_event/user/inc \
+-IUser/libcrc/crc32_mpeg2 \
+-IUser/other/inc \
 -ICore/Inc \
 -IDrivers/STM32F3xx_HAL_Driver/Inc \
 -IDrivers/STM32F3xx_HAL_Driver/Inc/Legacy \

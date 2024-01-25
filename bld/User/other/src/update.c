@@ -89,7 +89,7 @@ typedef struct {
   uint16_t data_size_one;   // 单次传输的升级数据大小
   uint16_t pkg_num_total;   // 升级包数量
   uint16_t process_num;     // 已处理包号
-  uint16_t recv_len;        // 已接收数据长度
+  uint32_t recv_len;        // 已接收数据长度
   uint32_t recv_crc;        // 已接收数据的 CRC
 } UPDATE_INFO;
 
@@ -107,7 +107,7 @@ static BOOT_PARAM boot_param_default = {
     .app_status = STATUS_BOOT,
     .back_to_app = 0,
 };
-const uint32_t boot_param_size16 = sizeof(BOOT_PARAM) / 2 + sizeof(BOOT_PARAM) % 2;
+const uint32_t boot_param_size16 = (sizeof(BOOT_PARAM) >> 1) + !!(sizeof(BOOT_PARAM) % 2);
 const uint32_t boot_param_crcdatalen = sizeof(boot_param_default) - sizeof(boot_param_default.crc_val);
 
 static inline void crc_reset(void) {
@@ -222,7 +222,7 @@ static int8_t boot_param_get_with_check(BOOT_PARAM *pdata) {
 }
 
 static int8_t load_app_from_backup(void) {
-  uint16_t buf[512];
+  uint16_t buf[1024];
   int8_t err = 0;
   uint32_t addr_write = ADDR_BASE_APP;
   uint32_t addr_read = ADDR_BASE_APP_BAK;
@@ -248,7 +248,7 @@ static int8_t load_app_from_backup(void) {
   return 0;
 }
 
-inline __attribute__((always_inline)) void boot_to_app(uint32_t boot_addr) {
+static inline __attribute__((always_inline)) void boot_to_app(uint32_t boot_addr) {
   MspAddress = STMFLASH_ReadWord(boot_addr);
   JumpAddress = STMFLASH_ReadWord(boot_addr + 4);
   JumpToApplication = (pFunction)JumpAddress;
@@ -279,7 +279,6 @@ inline __attribute__((always_inline)) void boot_to_app(uint32_t boot_addr) {
 
 void boot_param_check(void) {
   BOOT_PARAM param;
-  uint32_t msp_addr;
 
   if (boot_param_get_with_check(&param)) {
     Error_Handler();
@@ -386,16 +385,6 @@ void boot_param_check(void) {
   }
 }
 
-void boot_test(void) {
-#ifdef DEBUG
-  crc_reset();
-  boot_param_default.crc_val = param_crc_calc(&boot_param_default);
-  printf_dbg("0x%08x\r\n", boot_param_default.crc_val);
-#endif
-
-  boot_param_check();
-}
-
 void update_status_get(frame_parse_t *frame) {
   SYS_PARAM *sys = sys_param_get();
   uint16_t update_status = sys->ctrl.update.status;
@@ -469,6 +458,7 @@ void update_frame_parse(frame_parse_t *frame) {
 
 static void update_init(SYS_PARAM *sys) {
   int8_t err = 0;
+  UPDATE_STATUS status;
 
   sys->ctrl.update.stage = UPDATE_BEGIN;
   sys->ctrl.update.status = 0x1FFF;
@@ -483,7 +473,9 @@ static void update_init(SYS_PARAM *sys) {
   if (err) {
     /* 理论上不应该发生 */
     printf_dbg("![impossible] update_init\r\n");
-    ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_FLASH_WR;
+    memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+    status.errno = ERRNO_FLASH_WR;
+    memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
   }
 }
 
@@ -496,6 +488,7 @@ void update_pkg_process(void) {
   SYS_PARAM *sys = sys_param_get();
   uint32_t pkg_crc;
   int8_t err = 0;
+  UPDATE_STATUS status;
 
   if (!sys->ctrl.update.need_process) {
     return;
@@ -528,14 +521,18 @@ void update_pkg_process(void) {
           memcpy(&s_update_info.pkg_num_total, &s_update_pkg.head->pkg_num_total, sizeof(s_update_info.pkg_num_total));
           /* 检查升级包数量 */
           if (s_update_info.pkg_num_total >= 0xFFE) {
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_PKG_NUM;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_PKG_NUM;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             break;
           }
           /* 检查数据长度 */
           if ((s_update_info.file_size_real > PART_SIZE_APP) ||
               (s_update_info.data_size_one > UPDATE_PACKAGE_MAX_SIZE) ||
               (s_update_info.data_size_one % 2)) {
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_DATA_SIZE;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_DATA_SIZE;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             break;
           }
           /* 更新引导参数 */
@@ -543,7 +540,9 @@ void update_pkg_process(void) {
           if (boot_param_update(&s_update_info.boot_param)) {
             /* 理论上不应该发生 */
             printf_dbg("![impossible] PKG_TYPE_HEAD\r\n");
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_FLASH_WR;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_FLASH_WR;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             break;
           }
           sys->ctrl.update.stage = UPDATE_TRANSMIT;
@@ -561,35 +560,45 @@ void update_pkg_process(void) {
           update_init(sys);
         } break;
         case PKG_TYPE_DATA: {
-          ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_PROC;
-          ((UPDATE_STATUS *)&sys->ctrl.update.status)->pkg_num = s_update_info.process_num;
+          memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+          status.errno = ERRNO_PROC;
+          status.pkg_num = s_update_info.process_num;
+          memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
           /* 检查升级包号 */
           if ((s_update_pkg.data->pkg_num <= s_update_info.pkg_num_total) && (s_update_pkg.data->pkg_num != s_update_info.process_num + 1)) {
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_PKG_NUM;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_PKG_NUM;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             break;
           }
           /* 检查数据长度 */
           if ((s_update_pkg.data->data_len > s_update_info.data_size_one) ||
               ((s_update_pkg.data->data_len != s_update_info.data_size_one) && (s_update_pkg.data->pkg_num < s_update_info.pkg_num_total))) {
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_DATA_SIZE;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_DATA_SIZE;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             break;
           }
           /* 计算数据 CRC */
           pkg_crc = HAL_CRC_Calculate(&hcrc, (uint32_t *)s_update_pkg.data->data, s_update_pkg.data->data_len);
           if (pkg_crc != s_update_pkg.data->pkg_crc) {
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_CHECK_CRC;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_CHECK_CRC;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             break;
           }
           /* 向 Flash 写入数据 */
           disable_global_irq();
           err = STMFLASH_Write((ADDR_BASE_APP_BAK + s_update_info.recv_len),
               (uint16_t *)s_update_pkg.data->data,
-              (s_update_pkg.data->data_len / 2 + !!(s_update_pkg.data->data_len % 2)));
+              ((s_update_pkg.data->data_len >> 1) + !!(s_update_pkg.data->data_len % 2)));
           enable_global_irq();
           if (err) {
             /* 理论上不应该发生 */
             printf_dbg("![impossible] PKG_TYPE_DATA\r\n");
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_FLASH_WR;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_FLASH_WR;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             update_reset(sys);
             break;
           }
@@ -598,19 +607,25 @@ void update_pkg_process(void) {
           s_update_info.recv_crc = CRC_OPT(crc32_mpeg2, accum)(&s_update_info.crc, s_update_pkg.data->data, s_update_pkg.data->data_len);
           /* 数据包接收成功 */
           s_update_info.process_num += 1;
-          ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_SUCC;
-          ((UPDATE_STATUS *)&sys->ctrl.update.status)->pkg_num = s_update_info.process_num;
+          memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+          status.errno = ERRNO_SUCC;
+          status.pkg_num = s_update_info.process_num;
+          memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
         } break;
         case PKG_TYPE_FINISH: {
           sys->ctrl.update.status = 0xEFFE;
           /* 验证文件长度 */
           if (s_update_info.file_size_real != s_update_info.recv_len) {
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_DATA_SIZE;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_DATA_SIZE;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             break;
           }
           /* 校验文件 CRC */
           if (s_update_info.file_crc != CRC_OPT(crc32_mpeg2, get)(&s_update_info.crc)) {
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_CHECK_CRC;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_CHECK_CRC;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             break;
           }
           /* 更新引导参数 */
@@ -619,7 +634,9 @@ void update_pkg_process(void) {
           if (boot_param_update(&s_update_info.boot_param)) {
             /* 理论上不应该发生 */
             printf_dbg("![impossible] PKG_TYPE_FINISH\r\n");
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_FLASH_WR;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_FLASH_WR;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             sys->ctrl.update.stage = UPDATE_FINISH;
             break;
           }
@@ -627,7 +644,9 @@ void update_pkg_process(void) {
           if (load_app_from_backup()) {
             /* 理论上不应该发生 */
             printf_dbg("![impossible] PKG_TYPE_FINISH\r\n");
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_FLASH_WR;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_FLASH_WR;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             sys->ctrl.update.stage = UPDATE_FINISH;
             break;
           }
@@ -637,12 +656,16 @@ void update_pkg_process(void) {
           if (boot_param_update(&s_update_info.boot_param)) {
             /* 理论上不应该发生 */
             printf_dbg("![impossible] PKG_TYPE_FINISH\r\n");
-            ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_FLASH_WR;
+            memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+            status.errno = ERRNO_FLASH_WR;
+            memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
             sys->ctrl.update.stage = UPDATE_FINISH;
             break;
           }
           /* 升级成功 */
-          ((UPDATE_STATUS *)&sys->ctrl.update.status)->errno = ERRNO_SUCC;
+          memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+          status.errno = ERRNO_SUCC;
+          memcpy(&sys->ctrl.update.status, &status, sizeof(UPDATE_STATUS));
           sys->ctrl.update.stage = UPDATE_FINISH;
         } break;
         case PKG_TYPE_HEAD:
@@ -655,7 +678,8 @@ void update_pkg_process(void) {
       switch (s_update_pkg.type) {
         case PKG_TYPE_INIT: {
           /* 升级失败，等待复位 */
-          if (((UPDATE_STATUS *)&sys->ctrl.update.status)->errno != ERRNO_SUCC) {
+          memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
+          if (status.errno != ERRNO_SUCC) {
             update_init(sys);
           }
         } break;

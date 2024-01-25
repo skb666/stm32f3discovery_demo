@@ -98,10 +98,7 @@ int main(void)
   MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
   uart_config(DEV_USART1);
-
-  boot_test();
-
-  LL_IWDG_ReloadCounter(IWDG);
+  boot_param_check();
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -130,9 +130,7 @@ int main(void)
   LL_mDelay(750);
   sys_param_init();
   task_init();
-
-  boot_test();
-  LL_IWDG_ReloadCounter(IWDG);
+  boot_param_check();
   /* USER CODE END 2 */
 
   /* Infinite loop */

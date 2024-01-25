@@ -20,9 +20,10 @@ if __name__ == "__main__":
         usage()
         exit(2)
 
-    portname = "COM4"
+    portname = "COM5"
     baudrate = 115200
-    filename = "../app/emStudio/Output/Debug/Exe/stm32f3-app.bin"
+    # filename = "../app/emStudio/Output/Debug/Exe/stm32f3-app.bin"
+    filename = "../app/build/stm32f3-app.bin"
 
     for op, val in opts:
         if op in ("-d", "--device"):

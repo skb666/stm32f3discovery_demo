@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-void boot_test(void);
+void boot_param_check(void);
 
 #ifdef __cplusplus
 }

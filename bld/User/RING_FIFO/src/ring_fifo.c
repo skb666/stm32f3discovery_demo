@@ -313,12 +313,12 @@ NUM_TYPE ring_size(RING_FIFO *ring) {
 void print_ring(RING_FIFO *ring) {
 #ifdef DEBUG
   printf("========== ring ==========\n");
-  printf("cover: %lu\n", (uint64_t)ring->cover);
-  printf("element_size: %lu\n", (uint64_t)ring->element_size);
-  printf("capacity: %lu\n", (uint64_t)ring->capacity);
-  printf("head: %lu\n", (uint64_t)ring->head);
-  printf("tail: %lu\n", (uint64_t)ring->tail);
-  printf("size: %lu\n", (uint64_t)ring->size);
+  printf("cover: %llu\n", (uint64_t)ring->cover);
+  printf("element_size: %llu\n", (uint64_t)ring->element_size);
+  printf("capacity: %llu\n", (uint64_t)ring->capacity);
+  printf("head: %llu\n", (uint64_t)ring->head);
+  printf("tail: %llu\n", (uint64_t)ring->tail);
+  printf("size: %llu\n", (uint64_t)ring->size);
   printf("--------------------------\n");
 #endif
 }

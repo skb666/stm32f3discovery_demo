@@ -32,7 +32,6 @@ int8_t STMFLASH_Read(const uint32_t ReadAddr, uint16_t *pBuffer, uint32_t Num) {
 }
 
 int8_t STMFLASH_Write(uint32_t WriteAddr, uint16_t *pBuffer, uint32_t Num) {
-  FLASH_EraseInitTypeDef FlashEraseInit;
   HAL_StatusTypeDef status = HAL_OK;
   uint32_t addrx = 0;
   uint32_t addr_end = 0;

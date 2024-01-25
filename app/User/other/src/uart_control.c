@@ -28,6 +28,7 @@ int shell_usart_cmd(int argc, char *argv[]) {
       dev_type = DEV_USART3;
     } break;
     default: {
+      return -1;
     } break;
   }
 

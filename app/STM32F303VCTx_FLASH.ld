@@ -63,7 +63,7 @@ MEMORY
 {
 RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 40K
 CCMRAM (xrw)      : ORIGIN = 0x10000000, LENGTH = 8K
-FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 256K
+FLASH (rx)      : ORIGIN = 0x8009000, LENGTH = 110K
 }
 
 /* Define output sections */
@@ -141,6 +141,8 @@ SECTIONS
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
+	*(.RAM1)
+    *(.RAM1*)
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
@@ -154,12 +156,14 @@ SECTIONS
   * If initialized variables will be placed in this section,
   * the startup code needs to be modified to copy the init-values.  
   */
-  .ccmram :
+  .ccmram (NOLOAD) :
   {
     . = ALIGN(4);
     _sccmram = .;       /* create a global symbol at ccmram start */
     *(.ccmram)
     *(.ccmram*)
+	*(.CCM_RAM1)
+    *(.CCM_RAM1*)
     
     . = ALIGN(4);
     _eccmram = .;       /* create a global symbol at ccmram end */

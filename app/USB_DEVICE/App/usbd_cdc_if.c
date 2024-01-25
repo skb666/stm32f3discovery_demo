@@ -428,7 +428,6 @@ int8_t usb_tx_trans(void)
 
 void usb_printf(const char *format, ...)
 {
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
   va_list args;
   uint32_t length;
   uint16_t success = 0;
@@ -461,7 +460,6 @@ void usb_printf(const char *format, ...)
 
 void usb_puts(uint8_t* buf, uint16_t len)
 {
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
   uint16_t success = 0;
   uint8_t *pbuf;
 

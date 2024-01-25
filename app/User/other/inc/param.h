@@ -22,7 +22,14 @@ typedef struct {
 } LED_CTRL;
 
 typedef struct {
+  uint16_t need_process;
+  uint16_t stage;
+  uint16_t status;
+} UPDATE_CTRL;
+
+typedef struct {
   LED_CTRL leds;
+  UPDATE_CTRL update;
 } SYS_CTRL;
 
 typedef struct {
