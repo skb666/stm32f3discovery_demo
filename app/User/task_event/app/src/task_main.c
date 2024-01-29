@@ -17,6 +17,8 @@ typedef enum {
   FRAME_TYPE_SYSTEM_CTRL = 0x01,
   FRAME_TYPE_UPDATE_DATA = 0xf1,
   FRAME_TYPE_UPDATE_STATUS = 0xf2,
+  FRAME_TYPE_I2C_WRITE = 0xe1,
+  FRAME_TYPE_I2C_READ = 0xe2,
   FRAME_TYPE_MAX,
 } FRAME_TYPE;
 
@@ -29,6 +31,8 @@ extern void system_ctrl_frame_parse(frame_parse_t *frame);
 extern void update_status_get(frame_parse_t *frame);
 extern void update_frame_parse(frame_parse_t *frame);
 extern void update_pkg_process(void);
+extern void uart_frame_i2c_write(frame_parse_t *frame);
+extern void uart_frame_i2c_read(frame_parse_t *frame);
 
 static void task_event_process(TASK *task, void (*callback)(EVENT *)) {
   int8_t err;
@@ -345,6 +349,8 @@ void main_loop_init(void) {
   frame_parse_register(DEV_USART1, FRAME_TYPE_SYSTEM_CTRL, system_ctrl_frame_parse);
   frame_parse_register(DEV_USART1, FRAME_TYPE_UPDATE_DATA, update_frame_parse);
   frame_parse_register(DEV_USART1, FRAME_TYPE_UPDATE_STATUS, update_status_get);
+  frame_parse_register(DEV_USART1, FRAME_TYPE_I2C_WRITE, uart_frame_i2c_write);
+  frame_parse_register(DEV_USART1, FRAME_TYPE_I2C_READ, uart_frame_i2c_read);
   frame_parse_register(DEV_USART3, FRAME_TYPE_DEBUG, print_frame_usart3);
 }
 
