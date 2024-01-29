@@ -59,7 +59,7 @@ static BOOT_PARAM boot_param_default = {
     .app_status = STATUS_BOOT,
     .back_to_app = 0,
 };
-const uint32_t boot_param_size16 = (sizeof(BOOT_PARAM) >> 1) + !!(sizeof(BOOT_PARAM) % 2);
+const uint32_t boot_param_size64 = (sizeof(BOOT_PARAM) >> 3) + !!(sizeof(BOOT_PARAM) % 8);
 const uint32_t boot_param_crcdatalen = sizeof(boot_param_default) - sizeof(boot_param_default.crc_val);
 
 static inline void crc_reset(void) {
@@ -96,7 +96,7 @@ static int8_t boot_param_save(uint32_t addr, BOOT_PARAM *param) {
   }
 
   disable_global_irq();
-  err = STMFLASH_Write(addr, (uint16_t *)param, boot_param_size16);
+  err = STMFLASH_Write(addr, (uint64_t *)param, boot_param_size64);
   enable_global_irq();
   if (err) {
     printf_dbg("ERROR: Flash Write\r\n");
@@ -123,14 +123,14 @@ int8_t boot_param_update(BOOT_PARAM *param) {
 }
 
 void boot_param_get(BOOT_PARAM *pdata) {
-  (void)STMFLASH_Read(ADDR_BASE_PARAM, (uint16_t *)pdata, boot_param_size16);
+  (void)STMFLASH_Read(ADDR_BASE_PARAM, (uint64_t *)pdata, boot_param_size64);
 }
 
 static int8_t boot_param_get_with_check(BOOT_PARAM *pdata) {
   BOOT_PARAM param, param_bak;
 
-  (void)STMFLASH_Read(ADDR_BASE_PARAM, (uint16_t *)&param, boot_param_size16);
-  (void)STMFLASH_Read(ADDR_BASE_PARAM_BAK, (uint16_t *)&param_bak, boot_param_size16);
+  (void)STMFLASH_Read(ADDR_BASE_PARAM, (uint64_t *)&param, boot_param_size64);
+  (void)STMFLASH_Read(ADDR_BASE_PARAM_BAK, (uint64_t *)&param_bak, boot_param_size64);
 
   if (param_crc_calc(&param) == param.crc_val) {
     printf_dbg("boot param checked Ok\r\n");
@@ -173,8 +173,9 @@ static int8_t boot_param_get_with_check(BOOT_PARAM *pdata) {
   return 0;
 }
 
+#ifdef PROGRAM_BLD
 static int8_t load_app_from_backup(void) {
-  uint16_t buf[1024];
+  uint64_t buf[256];
   int8_t err = 0;
   uint32_t addr_write = ADDR_BASE_APP;
   uint32_t addr_read = ADDR_BASE_APP_BAK;
@@ -187,9 +188,9 @@ static int8_t load_app_from_backup(void) {
   }
 
   while (addr_write < ADDR_BASE_APP_BAK) {
-    (void)STMFLASH_Read(addr_read, buf, sizeof(buf) >> 1);
+    (void)STMFLASH_Read(addr_read, buf, sizeof(buf) >> 3);
     disable_global_irq();
-    err = STMFLASH_Write(addr_write, buf, sizeof(buf) >> 1);
+    err = STMFLASH_Write(addr_write, buf, sizeof(buf) >> 3);
     enable_global_irq();
     if (!err) {
       addr_read += sizeof(buf);
@@ -199,7 +200,9 @@ static int8_t load_app_from_backup(void) {
 
   return 0;
 }
+#endif
 
+#ifdef PROGRAM_BLD
 static inline __attribute__((always_inline)) void boot_to_app(uint32_t boot_addr) {
   MspAddress = STMFLASH_ReadWord(boot_addr);
   JumpAddress = STMFLASH_ReadWord(boot_addr + 4);
@@ -218,6 +221,14 @@ static inline __attribute__((always_inline)) void boot_to_app(uint32_t boot_addr
   LL_USART_DeInit(USART1);
   LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_5);
   LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_4);
+  LL_I2C_Disable(I2C2);
+  LL_I2C_DisableIT_ADDR(I2C2);
+  LL_I2C_DisableIT_NACK(I2C2);
+  LL_I2C_DisableIT_ERR(I2C2);
+  LL_I2C_DisableIT_STOP(I2C2);
+  LL_I2C_DisableIT_RX(I2C2);
+  LL_I2C_DisableIT_TX(I2C2);
+  LL_I2C_DeInit(I2C2);
   HAL_CRC_DeInit(&hcrc);
   HAL_DeInit();
 
@@ -228,12 +239,17 @@ static inline __attribute__((always_inline)) void boot_to_app(uint32_t boot_addr
   __set_MSP(MspAddress);
   JumpToApplication();
 }
+#endif
 
-void boot_param_check(void) {
+void boot_param_check(uint8_t with_check) {
   BOOT_PARAM param;
 
-  if (boot_param_get_with_check(&param)) {
-    Error_Handler();
+  if (with_check) {
+    if (boot_param_get_with_check(&param)) {
+      Error_Handler();
+    }
+  } else {
+    boot_param_get(&param);
   }
 
   if (SCB->VTOR == ADDR_BASE_APP) {
@@ -249,6 +265,7 @@ void boot_param_check(void) {
     printf_dbg("running in bld\r\n");
   }
 
+#ifdef PROGRAM_BLD
   if (!param.update_needed) {
     switch (param.app_status) {
       /* 默认状态，尝试引导 */
@@ -335,6 +352,7 @@ void boot_param_check(void) {
   if (boot_param_update(&param)) {
     Error_Handler();
   }
+#endif
 }
 
 static void update_init(SYS_PARAM *sys) {
@@ -418,6 +436,7 @@ void update_pkg_process(void) {
             break;
           }
           /* 更新引导参数 */
+          s_update_info.boot_param.update_needed = 1;
           s_update_info.boot_param.app_status = STATUS_RECV;
           if (boot_param_update(&s_update_info.boot_param)) {
             /* 理论上不应该发生 */
@@ -472,8 +491,8 @@ void update_pkg_process(void) {
           /* 向 Flash 写入数据 */
           disable_global_irq();
           err = STMFLASH_Write((ADDR_BASE_APP_BAK + s_update_info.recv_len),
-              (uint16_t *)g_update_pkg.data.data,
-              ((g_update_pkg.data.data_len >> 1) + !!(g_update_pkg.data.data_len % 2)));
+              (uint64_t *)g_update_pkg.data.data,
+              ((g_update_pkg.data.data_len >> 3) + !!(g_update_pkg.data.data_len % 8)));
           enable_global_irq();
           if (err) {
             /* 理论上不应该发生 */
@@ -519,6 +538,7 @@ void update_pkg_process(void) {
             break;
           }
           /* 更新引导参数 */
+          s_update_info.boot_param.update_needed = 1;
           s_update_info.boot_param.back_to_app = 0;
           s_update_info.boot_param.app_status = STATUS_LOAD;
           if (boot_param_update(&s_update_info.boot_param)) {
@@ -530,6 +550,7 @@ void update_pkg_process(void) {
             sys->ctrl.update.stage = UPDATE_FINISH;
             break;
           }
+#if 0
           /* 加载 APP 到运行区 */
           if (load_app_from_backup()) {
             /* 理论上不应该发生 */
@@ -552,6 +573,7 @@ void update_pkg_process(void) {
             sys->ctrl.update.stage = UPDATE_FINISH;
             break;
           }
+#endif
           /* 升级成功 */
           memcpy(&status, &sys->ctrl.update.status, sizeof(UPDATE_STATUS));
           status.errno = ERRNO_SUCC;

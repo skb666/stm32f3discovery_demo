@@ -130,7 +130,7 @@ int main(void)
   LL_mDelay(750);
   sys_param_init();
   task_init();
-  boot_param_check();
+  boot_param_check(1);
   /* USER CODE END 2 */
 
   /* Infinite loop */

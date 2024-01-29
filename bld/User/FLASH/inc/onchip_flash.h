@@ -151,8 +151,8 @@ static inline uint64_t STMFLASH_ReadDoubleWord(uint32_t faddr) {
   return *(volatile uint64_t *)faddr;
 }
 
-int8_t STMFLASH_Write(uint32_t WriteAddr, uint16_t *pBuffer, uint32_t Num);
-int8_t STMFLASH_Read(const uint32_t ReadAddr, uint16_t *pBuffer, uint32_t Num);
+int8_t STMFLASH_Write(uint32_t WriteAddr, uint64_t *pBuffer, uint32_t Num);
+int8_t STMFLASH_Read(const uint32_t ReadAddr, uint64_t *pBuffer, uint32_t Num);
 int8_t STMFLASH_Erase(uint32_t addrx, uint32_t length, uint32_t retry);
 
 #ifdef __cplusplus

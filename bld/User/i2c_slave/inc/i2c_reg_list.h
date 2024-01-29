@@ -10,7 +10,6 @@ extern "C" {
 typedef enum {
   REG_VERSION = 0x0000,
   REG_SYSTEM_CTRL = 0x0001,
-  REG_LED = 0x0002,
   REG_UPDATE_DATA = 0xFF01,
   REG_UPDATE_STATUS = 0xFF02,
   REG_MAX = 0xFFFF,

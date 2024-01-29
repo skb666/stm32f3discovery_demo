@@ -4,10 +4,10 @@ import json
 
 if __name__ == "__main__":
     partition_table  = "partition_table.json"
-    # bld_file = "../bld/emStudio/Output/Debug/Exe/stm32f3-bld.bin"
-    # app_file = "../app/emStudio/Output/Debug/Exe/stm32f3-app.bin"
-    bld_file = "../bld/build/stm32f3-bld.bin"
-    app_file = "../app/build/stm32f3-app.bin"
+    bld_file = "../bld/emStudio/Output/Debug/Exe/stm32f3-bld.bin"
+    app_file = "../app/emStudio/Output/Debug/Exe/stm32f3-app.bin"
+    # bld_file = "../bld/build/stm32f3-bld.bin"
+    # app_file = "../app/build/stm32f3-app.bin"
     out_file = "merge.bin"
 
     with open(partition_table, "r") as f_obj:

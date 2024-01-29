@@ -20,6 +20,7 @@
 #include "main.h"
 #include "crc.h"
 #include "dma.h"
+#include "i2c.h"
 #include "iwdg.h"
 #include "usart.h"
 #include "gpio.h"
@@ -27,6 +28,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "device.h"
+#include "i2c_slave.h"
 #include "param.h"
 #include "task.h"
 #include "update.h"
@@ -96,9 +98,11 @@ int main(void)
   MX_USART1_UART_Init();
   MX_CRC_Init();
   MX_IWDG_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   uart_config(DEV_USART1);
-  boot_param_check();
+  i2c_slave_config();
+  boot_param_check(1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -161,6 +165,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK2);
+  LL_RCC_SetI2CClockSource(LL_RCC_I2C2_CLKSOURCE_HSI);
 }
 
 /* USER CODE BEGIN 4 */

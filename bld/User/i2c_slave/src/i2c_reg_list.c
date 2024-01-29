@@ -6,7 +6,6 @@
 
 static REG_T s_reg_list[] = {
     {REG_VERSION, REG_RO, reg_read_cb_version, NULL},
-    {REG_LED, REG_RW, reg_read_cb_led, reg_write_cb_led},
     {REG_SYSTEM_CTRL, REG_RW, reg_read_cb_system_ctrl, reg_write_cb_system_ctrl},
     {REG_UPDATE_DATA, REG_RW, reg_read_cb_update_status, reg_write_cb_update_data},
     {REG_UPDATE_STATUS, REG_RO, reg_read_cb_update_status, NULL},

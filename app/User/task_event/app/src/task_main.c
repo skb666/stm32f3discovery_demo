@@ -8,11 +8,15 @@
 #include "param.h"
 #include "task.h"
 #include "timer.h"
+#include "update.h"
 #include "usbd_cdc_if.h"
 #include "xcmd.h"
 
 typedef enum {
   FRAME_TYPE_DEBUG = 0,
+  FRAME_TYPE_SYSTEM_CTRL = 0x01,
+  FRAME_TYPE_UPDATE_DATA = 0xf1,
+  FRAME_TYPE_UPDATE_STATUS = 0xf2,
   FRAME_TYPE_MAX,
 } FRAME_TYPE;
 
@@ -20,6 +24,11 @@ typedef enum {
   FROM_RX,
   FROM_TX,
 } DATA_FROM;
+
+extern void system_ctrl_frame_parse(frame_parse_t *frame);
+extern void update_status_get(frame_parse_t *frame);
+extern void update_frame_parse(frame_parse_t *frame);
+extern void update_pkg_process(void);
 
 static void task_event_process(TASK *task, void (*callback)(EVENT *)) {
   int8_t err;
@@ -299,6 +308,32 @@ static void print_frame_usart3(frame_parse_t *frame) {
   uart_puts(DEV_USART3, frame->data, frame->length);
 }
 
+static void system_ctrl_check(void) {
+  SYS_PARAM *sys = sys_param_get();
+  BOOT_PARAM param;
+
+  switch (sys->ctrl.system) {
+    case SYSTEM_CTRL_REBOOT: {
+      uart_printf(DEV_USART1, "SYSTEM_CTRL_REBOOT\r\n");
+      LL_mDelay(500);
+      NVIC_SystemReset();
+    } break;
+    case SYSTEM_CTRL_UPDATE_START: {
+      boot_param_get(&param);
+
+      param.update_needed = 1;
+      if (boot_param_update(&param)) {
+        Error_Handler();
+      }
+
+      uart_printf(DEV_USART1, "SYSTEM_CTRL_UPDATE_START\r\n");
+      NVIC_SystemReset();
+    } break;
+    default: {
+    } break;
+  }
+}
+
 void main_loop_init(void) {
   xcmd_init(cmd_get_char, cmd_put_char);
   mycmd_init();
@@ -307,6 +342,9 @@ void main_loop_init(void) {
   uart_set_rx_monitor(DEV_USART3, usb_monitor(DEV_USART3, FROM_RX));
 
   frame_parse_register(DEV_USART1, FRAME_TYPE_DEBUG, print_frame_usart1);
+  frame_parse_register(DEV_USART1, FRAME_TYPE_SYSTEM_CTRL, system_ctrl_frame_parse);
+  frame_parse_register(DEV_USART1, FRAME_TYPE_UPDATE_DATA, update_frame_parse);
+  frame_parse_register(DEV_USART1, FRAME_TYPE_UPDATE_STATUS, update_status_get);
   frame_parse_register(DEV_USART3, FRAME_TYPE_DEBUG, print_frame_usart3);
 }
 
@@ -338,6 +376,12 @@ void main_loop_handle(TASK *task) {
     default: {
     } break;
   }
+
+  // 固件升级
+  update_pkg_process();
+
+  // 系统控制
+  system_ctrl_check();
 
   task_update_times(task);
 }

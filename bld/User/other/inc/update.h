@@ -5,6 +5,8 @@
 
 #include "onchip_flash.h"
 
+#define PROGRAM_BLD
+
 #define ADDR_BASE_BLD (STMFLASH_BASE)
 #define ADDR_BASE_PARAM (ADDR_FLASH_PAGE_16)
 #define ADDR_BASE_PARAM_BAK (ADDR_FLASH_PAGE_17)
@@ -67,7 +69,7 @@ typedef struct {
 
 int8_t boot_param_update(BOOT_PARAM *param);
 void boot_param_get(BOOT_PARAM *pdata);
-void boot_param_check(void);
+void boot_param_check(uint8_t with_check);
 
 #ifdef __cplusplus
 }
