@@ -19,25 +19,39 @@ static uint8_t i2c_buf[1280];
 static uint16_t i2c_buf_size = 0;
 
 static inline void i2c_master_write(uint16_t DevAddress, uint8_t *pData, uint16_t Size) {
+  uint8_t retry = 3;
+  uint16_t timeout = 50;
   do {
     if (HAL_I2C_Master_Transmit_DMA(I2C_MASTER_HANDLE, (DevAddress << 1), pData, Size) != HAL_OK) {
-      xcmd_print("write error: %u\r\n", HAL_I2C_GetError(I2C_MASTER_HANDLE));
+      printf_dbg("write error: %u\r\n", HAL_I2C_GetError(I2C_MASTER_HANDLE));
       return;
     }
     while (HAL_I2C_GetState(I2C_MASTER_HANDLE) != HAL_I2C_STATE_READY) {
+      if (LL_SYSTICK_IsActiveCounterFlag()) {
+        if (timeout-- == 0) {
+          break;
+        }
+      }
     }
-  } while (HAL_I2C_GetError(I2C_MASTER_HANDLE) == HAL_I2C_ERROR_AF);
+  } while (retry-- && HAL_I2C_GetError(I2C_MASTER_HANDLE) == HAL_I2C_ERROR_AF);
 }
 
 static inline void i2c_master_read(uint16_t DevAddress, uint8_t *pData, uint16_t Size) {
+  uint8_t retry = 3;
+  uint16_t timeout = 50;
   do {
     if (HAL_I2C_Master_Receive_DMA(I2C_MASTER_HANDLE, (DevAddress << 1), pData, Size) != HAL_OK) {
-      xcmd_print("read error: %u\r\n", HAL_I2C_GetError(I2C_MASTER_HANDLE));
+      printf_dbg("read error: %u\r\n", HAL_I2C_GetError(I2C_MASTER_HANDLE));
       return;
     }
     while (HAL_I2C_GetState(I2C_MASTER_HANDLE) != HAL_I2C_STATE_READY) {
+      if (LL_SYSTICK_IsActiveCounterFlag()) {
+        if (timeout-- == 0) {
+          break;
+        }
+      }
     }
-  } while (HAL_I2C_GetError(I2C_MASTER_HANDLE) == HAL_I2C_ERROR_AF);
+  } while (retry-- && HAL_I2C_GetError(I2C_MASTER_HANDLE) == HAL_I2C_ERROR_AF);
 }
 
 int shell_i2cdetect_cmd(int argc, char *argv[]) {

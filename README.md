@@ -6,7 +6,9 @@
 + USB-CDC shell
 + USB-CDC 透传 USART1/USART3
 + I2C 从机的中断方式实现（LL 库）
++ 通过串口读写 I2C
 + 串口升级协议调试
++ I2C 升级协议调试
 + shell 实现:
 	- led 控制
 	- i2cdetect

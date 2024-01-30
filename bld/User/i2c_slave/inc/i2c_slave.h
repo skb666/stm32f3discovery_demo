@@ -5,7 +5,7 @@
 
 #define I2C_TYPE I2C2
 
-#define I2C_SLAVE_ADDRESS (0x3c << 1)
+#define I2C_SLAVE_ADDRESS (0x33 << 1)
 
 #define I2C_RX_RING_SIZE 1280
 #define I2C_TX_RING_SIZE 16
@@ -42,6 +42,7 @@ typedef struct {
 
 void i2c_slave_config(void);
 void i2c_ev_isr(void);
+void i2c_abnormal_check(uint16_t timeout);
 
 uint16_t i2c_slave_tx_get(uint8_t *buf, uint16_t size);
 uint16_t i2c_slave_tx_put(const uint8_t *buf, uint16_t size);
