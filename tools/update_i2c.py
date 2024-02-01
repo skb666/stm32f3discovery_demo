@@ -14,16 +14,20 @@ if __name__ == "__main__":
     from crc import CRC
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "d:b:f:", ["device=", "baudrate=", "file="])
+        opts, args = getopt.getopt(sys.argv[1:], "d:b:f:s:p", ["device=", "baudrate=", "file=", "--slave", "bld"])
     except getopt.GetoptError as err:
         print(err)
         usage()
         exit(2)
 
+    i2c_slave = 0x0033
+    partition_type_app = struct.pack('>I', 0xffffffff)
+    partition_type_bld = struct.pack('>I', 0xa5a5a5a5)
+    partition_type = partition_type_app
+
     portname = "COM5"
     baudrate = 115200
-    filename = "../app/emStudio/Output/Debug/Exe/stm32f3-app.bin"
-    # filename = "../app/build/stm32f3-app.bin"
+    filename = ""
 
     for op, val in opts:
         if op in ("-d", "--device"):
@@ -35,8 +39,22 @@ if __name__ == "__main__":
         elif op in ("-f", "--file"):
             filename = val
             print("get -f: %s" % filename)
+        elif op in ("-s", "--slave"):
+            i2c_slave = int(val, 16)
+            print("get -s: 0x%04x" % i2c_slave)
+        elif op in ("-p", "--bld"):
+            partition_type = partition_type_bld
+            print("get -p: update bld")
         else:
             assert False, "UNHANDLED OPTION"
+
+    if not filename:
+        if partition_type is partition_type_app:
+            filename = "../app/emStudio/Output/Debug/Exe/stm32f3-app.bin"
+            # filename = "../app/build/stm32f3-app.bin"
+        else:
+            filename = "../bld/emStudio/Output/Debug/Exe/stm32f3-bld.bin"
+            # filename = "../bld/build/stm32f3-bld.bin"
 
     ports = SerialCommand.get_all_ports()
     if not portname in ports:
@@ -49,7 +67,7 @@ if __name__ == "__main__":
         exit()
     sercomm.used_port_info()
 
-    i2c_dev_addr = struct.pack('>H', 0x0033)
+    i2c_dev_addr = struct.pack('>H', i2c_slave)
     i2c_reg_system_ctrl = struct.pack('>H', 0x0001)
     i2c_reg_update_data = struct.pack('>H', 0xff01)
     i2c_reg_update_status = struct.pack('>H', 0xff02)
@@ -77,7 +95,7 @@ if __name__ == "__main__":
         packed = frame_head + frame_type_i2c_write + struct.pack('>H', len(data)) + data
         sercomm.write_raw(packed)
 
-    def update_head():
+    def update_head(partition):
         crc32_mpeg2 = CRC("crc32_mpeg2")
         file_size_real = os.path.getsize(filename)
         data_size_one = 1024
@@ -93,7 +111,7 @@ if __name__ == "__main__":
                     break
                 crc32_mpeg2.accumulate(data)
             file_crc = crc32_mpeg2.get()
-        data = i2c_dev_addr + i2c_reg_update_data + pkg_type_head + struct.pack('>IIHH', file_crc, file_size_real, data_size_one, pkg_num_total)
+        data = i2c_dev_addr + i2c_reg_update_data + pkg_type_head + partition + struct.pack('>IIHH', file_crc, file_size_real, data_size_one, pkg_num_total)
         packed = frame_head + frame_type_i2c_write + struct.pack('>H', len(data)) + data
         sercomm.write_raw(packed)
         return (file_crc, file_size_real, data_size_one, pkg_num_total)
@@ -163,7 +181,7 @@ if __name__ == "__main__":
         exit()
 
     """ 升级文件头信息包 """
-    (file_crc, file_size_real, data_size_one, pkg_num_total) = update_head()
+    (file_crc, file_size_real, data_size_one, pkg_num_total) = update_head(partition_type)
     print(f"file_crc: 0x{file_crc:08x}\r\nfile_size_real: {file_size_real}\r\ndata_size_one: {data_size_one}\r\npkg_num_total: {pkg_num_total}")
     time.sleep(0.1)
     (errno, running, pkg_num) = get_update_status()
