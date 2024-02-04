@@ -15,12 +15,12 @@
 
 typedef enum {
   FRAME_TYPE_DEBUG = 0,
-  FRAME_TYPE_SYSTEM_CTRL = 0x01,
-  FRAME_TYPE_UPDATE_DATA = 0xf1,
-  FRAME_TYPE_UPDATE_STATUS = 0xf2,
-  FRAME_TYPE_I2C_WRITE = 0xe1,
-  FRAME_TYPE_I2C_READ = 0xe2,
-  FRAME_TYPE_MAX,
+  FRAME_TYPE_I2C_WRITE = 0xE1,
+  FRAME_TYPE_I2C_READ = 0xE2,
+  FRAME_TYPE_SYSTEM_CTRL = 0xF0,
+  FRAME_TYPE_UPDATE_DATA = 0xF1,
+  FRAME_TYPE_UPDATE_STATUS = 0xF2,
+  FRAME_TYPE_MAX = FUNC_LIST_MAX,
 } FRAME_TYPE;
 
 typedef enum {
@@ -349,11 +349,11 @@ void main_loop_init(void) {
   uart_set_rx_monitor(DEV_USART3, usb_monitor(DEV_USART3, FROM_RX));
 
   frame_parse_register(DEV_USART1, FRAME_TYPE_DEBUG, print_frame_usart1);
+  frame_parse_register(DEV_USART1, FRAME_TYPE_I2C_WRITE, uart_frame_i2c_write);
+  frame_parse_register(DEV_USART1, FRAME_TYPE_I2C_READ, uart_frame_i2c_read);
   frame_parse_register(DEV_USART1, FRAME_TYPE_SYSTEM_CTRL, system_ctrl_frame_parse);
   frame_parse_register(DEV_USART1, FRAME_TYPE_UPDATE_DATA, update_frame_parse);
   frame_parse_register(DEV_USART1, FRAME_TYPE_UPDATE_STATUS, update_status_get);
-  frame_parse_register(DEV_USART1, FRAME_TYPE_I2C_WRITE, uart_frame_i2c_write);
-  frame_parse_register(DEV_USART1, FRAME_TYPE_I2C_READ, uart_frame_i2c_read);
   frame_parse_register(DEV_USART3, FRAME_TYPE_DEBUG, print_frame_usart3);
 }
 

@@ -68,7 +68,7 @@ if __name__ == "__main__":
     sercomm.used_port_info()
 
     i2c_dev_addr = struct.pack('>H', i2c_slave)
-    i2c_reg_system_ctrl = struct.pack('>H', 0x0001)
+    i2c_reg_system_ctrl = struct.pack('>H', 0xff00)
     i2c_reg_update_data = struct.pack('>H', 0xff01)
     i2c_reg_update_status = struct.pack('>H', 0xff02)
     frame_head = b'\x55\xaa'
