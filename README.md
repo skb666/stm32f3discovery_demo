@@ -15,14 +15,4 @@
 	- i2ctransfer
 	- usart 调试助手
 
-**cmake 编译方法**
-
-```bash
-cd bld
-cmake -G "Unix Makefiles" -H. -Bbuild -DCMAKE_TOOLCHAIN_FILE=toolchains.cmake
-cmake --build build -t all -- -j${nproc}
-
-cd app
-cmake -G "Unix Makefiles" -H. -Bbuild -DCMAKE_TOOLCHAIN_FILE=toolchains.cmake
-cmake --build build -t all -- -j${nproc}
-```
+**[编译、升级方法](https://github.com/skb666/l431_demo/blob/main/README.md)**
