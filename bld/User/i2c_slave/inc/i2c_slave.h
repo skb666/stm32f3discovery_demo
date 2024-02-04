@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define I2C_TYPE I2C2
+#define I2C_SLAVE_TYPE I2C2
 
 #define I2C_SLAVE_ADDRESS (0x33 << 1)
 
