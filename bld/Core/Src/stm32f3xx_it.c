@@ -22,7 +22,7 @@
 #include "stm32f3xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "device.h"
+#include "uart_device.h"
 #include "i2c_slave.h"
 #include "task.h"
 #include "timer.h"

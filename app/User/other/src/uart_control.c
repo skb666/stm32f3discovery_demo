@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "device.h"
 #include "main.h"
 #include "param.h"
+#include "uart_device.h"
 #include "xcmd.h"
 
 int shell_usart_cmd(int argc, char *argv[]) {

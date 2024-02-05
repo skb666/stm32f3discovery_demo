@@ -3,9 +3,9 @@
 #include <string.h>
 
 #include "common.h"
-#include "device.h"
 #include "i2c.h"
 #include "main.h"
+#include "uart_device.h"
 #include "xcmd.h"
 
 #define I2C_MASTER_HANDLE &hi2c1

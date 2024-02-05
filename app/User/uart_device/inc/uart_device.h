@@ -1,14 +1,14 @@
-#ifndef __DEVICE_H__
-#define __DEVICE_H__
+#ifndef __UART_DEVICE_H__
+#define __UART_DEVICE_H__
 
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
-#define UART_RX_RING_SIZE 256
-#define UART_TX_RING_SIZE 256
-#define UART_DMARX_BUF_SIZE 64
-#define UART_DMATX_BUF_SIZE 64
+#define UART_RX_RING_SIZE 1280
+#define UART_TX_RING_SIZE 1280
+#define UART_DMARX_BUF_SIZE 256
+#define UART_DMATX_BUF_SIZE 256
 
 #define FRAME_DATA_LEN_MAX 1280
 #define FRAME_HEAD1 0x55
@@ -21,6 +21,7 @@ extern "C" {
 
 typedef enum {
   DEV_USART1,
+  DEV_USART3,
   DEV_NUM,
 } DEV_TYPE;
 

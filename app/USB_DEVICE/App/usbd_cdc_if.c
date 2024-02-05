@@ -26,7 +26,7 @@
 #include "ring_fifo.h"
 #include "common.h"
 #include "param.h"
-#include "device.h"
+#include "uart_device.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
