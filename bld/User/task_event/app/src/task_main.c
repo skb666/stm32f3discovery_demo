@@ -54,6 +54,7 @@ static void timer_1ms_cb(EVENT *ev) {
       i2c_abnormal_check(300);
       // 串口发送
       uart_tx_poll(DEV_USART1);
+      uart_tx_poll(DEV_USART3);
     } break;
     default: {
     } break;
@@ -65,8 +66,8 @@ void timer_1ms_handle(TASK *task) {
 }
 
 /* 循环任务 */
-static void print_frame_usart1(frame_parse_t *frame) {
-  uart_puts(DEV_USART1, frame->data, frame->length);
+static void print_frame_usart(frame_parse_t *frame) {
+  uart_puts(frame->dev_type, frame->data, frame->length);
 }
 
 static void system_ctrl_check(void) {
@@ -99,15 +100,20 @@ static void system_ctrl_check(void) {
 }
 
 void main_loop_init(void) {
-  frame_parse_register(DEV_USART1, FRAME_TYPE_DEBUG, print_frame_usart1);
+  frame_parse_register(DEV_USART1, FRAME_TYPE_DEBUG, print_frame_usart);
   frame_parse_register(DEV_USART1, FRAME_TYPE_SYSTEM_CTRL, system_ctrl_frame_parse);
   frame_parse_register(DEV_USART1, FRAME_TYPE_UPDATE_DATA, update_frame_parse);
   frame_parse_register(DEV_USART1, FRAME_TYPE_UPDATE_STATUS, update_status_get);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_DEBUG, print_frame_usart);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_SYSTEM_CTRL, system_ctrl_frame_parse);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_UPDATE_DATA, update_frame_parse);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_UPDATE_STATUS, update_status_get);
 }
 
 void main_loop_handle(TASK *task) {
-  // USART1 帧解析
+  // USART 帧解析
   uart_frame_parse(DEV_USART1);
+  uart_frame_parse(DEV_USART3);
 
   // 固件升级
   update_pkg_process();

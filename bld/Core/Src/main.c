@@ -99,8 +99,10 @@ int main(void)
   MX_CRC_Init();
   MX_IWDG_Init();
   MX_I2C2_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   uart_config(DEV_USART1);
+  uart_config(DEV_USART3);
   i2c_slave_config();
   boot_param_check(1);
   /* USER CODE END 2 */
@@ -173,6 +175,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_SYSCLK);
+  LL_RCC_SetUSARTClockSource(LL_RCC_USART3_CLKSOURCE_SYSCLK);
   LL_RCC_SetI2CClockSource(LL_RCC_I2C2_CLKSOURCE_SYSCLK);
 }
 

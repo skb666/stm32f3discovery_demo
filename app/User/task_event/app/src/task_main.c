@@ -307,12 +307,8 @@ static int cmd_put_char(uint8_t ch) {
   return 1;
 }
 
-static void print_frame_usart1(frame_parse_t *frame) {
-  uart_puts(DEV_USART1, frame->data, frame->length);
-}
-
-static void print_frame_usart3(frame_parse_t *frame) {
-  uart_puts(DEV_USART3, frame->data, frame->length);
+static void print_frame_usart(frame_parse_t *frame) {
+  uart_puts(frame->dev_type, frame->data, frame->length);
 }
 
 static void system_ctrl_check(void) {
@@ -348,13 +344,18 @@ void main_loop_init(void) {
   uart_set_rx_monitor(DEV_USART1, usb_monitor(DEV_USART1, FROM_RX));
   uart_set_rx_monitor(DEV_USART3, usb_monitor(DEV_USART3, FROM_RX));
 
-  frame_parse_register(DEV_USART1, FRAME_TYPE_DEBUG, print_frame_usart1);
+  frame_parse_register(DEV_USART1, FRAME_TYPE_DEBUG, print_frame_usart);
   frame_parse_register(DEV_USART1, FRAME_TYPE_I2C_WRITE, uart_frame_i2c_write);
   frame_parse_register(DEV_USART1, FRAME_TYPE_I2C_READ, uart_frame_i2c_read);
   frame_parse_register(DEV_USART1, FRAME_TYPE_SYSTEM_CTRL, system_ctrl_frame_parse);
   frame_parse_register(DEV_USART1, FRAME_TYPE_UPDATE_DATA, update_frame_parse);
   frame_parse_register(DEV_USART1, FRAME_TYPE_UPDATE_STATUS, update_status_get);
-  frame_parse_register(DEV_USART3, FRAME_TYPE_DEBUG, print_frame_usart3);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_DEBUG, print_frame_usart);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_I2C_WRITE, uart_frame_i2c_write);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_I2C_READ, uart_frame_i2c_read);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_SYSTEM_CTRL, system_ctrl_frame_parse);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_UPDATE_DATA, update_frame_parse);
+  frame_parse_register(DEV_USART3, FRAME_TYPE_UPDATE_STATUS, update_status_get);
 }
 
 void main_loop_handle(TASK *task) {

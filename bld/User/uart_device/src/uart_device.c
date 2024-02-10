@@ -71,6 +71,37 @@ void uart_config(DEV_TYPE dev_type) {
 
       LL_USART_EnableIT_IDLE(USART1);
     } break;
+    case DEV_USART3: {
+      /* USART_RX DMA */
+      LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_3,
+          LL_USART_DMA_GetRegAddr(USART3, LL_USART_DMA_REG_DATA_RECEIVE),
+          (uint32_t)uart_dmarx_buf[DEV_USART3],
+          LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_3));
+      LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_3, UART_DMARX_BUF_SIZE);
+
+      /* USART_TX DMA */
+      LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_2,
+          (uint32_t)uart_dmatx_buf[DEV_USART3],
+          LL_USART_DMA_GetRegAddr(USART3, LL_USART_DMA_REG_DATA_TRANSMIT),
+          LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_2));
+
+      LL_DMA_ClearFlag_HT3(DMA1);
+      LL_DMA_ClearFlag_TC3(DMA1);
+      LL_DMA_ClearFlag_TE3(DMA1);
+
+      LL_DMA_ClearFlag_TC2(DMA1);
+      LL_DMA_ClearFlag_TE2(DMA1);
+
+      LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_3);
+      LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_3);
+      LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_2);
+
+      LL_USART_EnableDMAReq_RX(USART3);
+      LL_USART_EnableDMAReq_TX(USART3);
+      LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_3);
+
+      LL_USART_EnableIT_IDLE(USART3);
+    } break;
     default: {
       return;
     } break;
@@ -99,6 +130,7 @@ void uart_config(DEV_TYPE dev_type) {
   // 默认按大端方式传输数据
   rx_frame[dev_type].byte_order = 1;
   rx_frame[dev_type].data = __frame_data[dev_type];
+  rx_frame[dev_type].dev_type = dev_type;
 }
 
 void uart_set_rx_monitor(DEV_TYPE dev_type, void (*monitor)(uint8_t *, uint16_t)) {
@@ -146,6 +178,9 @@ void uart_dmarx_part_done_isr(DEV_TYPE dev_type) {
   switch (dev_type) {
     case DEV_USART1: {
       recv_total_size = UART_DMARX_BUF_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_5);
+    } break;
+    case DEV_USART3: {
+      recv_total_size = UART_DMARX_BUF_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_3);
     } break;
     default: {
       return;
@@ -212,6 +247,11 @@ void uart_tx_poll(DEV_TYPE dev_type) {
       LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_4);
       LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, size);
       LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);
+    } break;
+    case DEV_USART3: {
+      LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
+      LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, size);
+      LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
     } break;
     default: {
     } break;

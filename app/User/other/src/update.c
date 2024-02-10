@@ -280,6 +280,14 @@ static inline __attribute__((always_inline)) void boot_to_app(uint32_t boot_addr
   LL_USART_DeInit(USART1);
   LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_5);
   LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_4);
+  LL_USART_Disable(USART3);
+  LL_USART_DisableIT_IDLE(USART3);
+  LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_3);
+  LL_DMA_DisableIT_TC(DMA1, LL_DMA_CHANNEL_3);
+  LL_DMA_DisableIT_TC(DMA1, LL_DMA_CHANNEL_2);
+  LL_USART_DeInit(USART3);
+  LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_3);
+  LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_2);
   LL_I2C_Disable(I2C2);
   LL_I2C_DisableIT_ADDR(I2C2);
   LL_I2C_DisableIT_NACK(I2C2);
