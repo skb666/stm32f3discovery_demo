@@ -11,6 +11,7 @@ typedef enum _TIMER_TICK {
   TICK_1MS = 1,
   TICK_5MS = 5,
   TICK_25MS = 25,
+  TICK_500MS = 500,
   TICK_1S = 1000,
   TICK_5S = 5000,
 } TIMER_TICK;

@@ -28,6 +28,8 @@ typedef enum {
   FROM_TX,
 } DATA_FROM;
 
+extern void led_blink_control(void);
+
 extern void system_ctrl_frame_parse(frame_parse_t *frame);
 extern void update_status_get(frame_parse_t *frame);
 extern void update_frame_parse(frame_parse_t *frame);
@@ -295,6 +297,37 @@ static void timer_1ms_cb(EVENT *ev) {
 
 void timer_1ms_handle(TASK *task) {
   task_event_process(task, timer_1ms_cb);
+}
+
+/* 500ms 周期任务 */
+void timer_500ms_init(void) {
+  SYS_PARAM *sys = sys_param_get();
+
+  task_event_subscribe(EVENT_TYPE_TICK_500MS, TASK_ID_TIMER_500MS);
+
+  sys->ctrl.leds.value = 0xFF;
+}
+
+static void timer_500ms_cb(EVENT *ev) {
+  SYS_PARAM *sys = sys_param_get();
+
+  switch (ev->type) {
+    case EVENT_TYPE_TICK_500MS: {
+      if (sys->ctrl.update.stage != 0) {
+        sys->ctrl.leds.value = 1 << (sys->ctrl.update.status << 13);
+      }
+
+      led_blink_control();
+
+      task_delay_ms(TASK_ID_TIMER_500MS, 500);
+    } break;
+    default: {
+    } break;
+  }
+}
+
+void timer_500ms_handle(TASK *task) {
+  task_event_process(task, timer_500ms_cb);
 }
 
 /* 循环任务 */

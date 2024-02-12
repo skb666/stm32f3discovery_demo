@@ -45,37 +45,24 @@ const static uint8_t led_index[LED_NUM] = {
     [LED_LD10] = 4,
 };
 
-static void led_control(const LED_GPIO *led, uint8_t sw) {
+static void led_reset(void) {
   SYS_PARAM *sys = sys_param_get();
   LED_CTRL leds = sys->ctrl.leds;
   size_t i = 0;
 
-  if (led) {
-    if (sw) {
-      LL_GPIO_SetOutputPin(led->port, led->pin);
-    } else {
-      LL_GPIO_ResetOutputPin(led->port, led->pin);
-    }
-    return;
-  }
-
   for (i = 0; i < LED_NUM; ++i, leds.value >>= 1) {
-    if (leds.value & 1) {
-      LL_GPIO_SetOutputPin(led_list[i].port, led_list[i].pin);
-    } else {
-      LL_GPIO_ResetOutputPin(led_list[i].port, led_list[i].pin);
-    }
+    LL_GPIO_ResetOutputPin(led_list[i].port, led_list[i].pin);
   }
 }
 
-void led_all_control(void) {
+void led_blink_control(void) {
   SYS_PARAM *sys = sys_param_get();
   LED_CTRL leds = sys->ctrl.leds;
   size_t i = 0;
 
   for (i = 0; i < LED_NUM; ++i, leds.value >>= 1) {
     if (leds.value & 1) {
-      LL_GPIO_SetOutputPin(led_list[i].port, led_list[i].pin);
+      LL_GPIO_TogglePin(led_list[i].port, led_list[i].pin);
     } else {
       LL_GPIO_ResetOutputPin(led_list[i].port, led_list[i].pin);
     }
@@ -99,7 +86,7 @@ int shell_led_cmd(int argc, char *argv[]) {
       }
       if (sscanf(argv[2], "%hx", &leds->value) > 0) {
         xcmd_print("led control: 0x%02x\r\n", leds->value);
-        led_control(NULL, 0);
+        led_reset();
       } else {
         xcmd_print("param error!\r\n");
       }
@@ -116,7 +103,7 @@ int shell_led_cmd(int argc, char *argv[]) {
           leds->value &= ~(1 << led_index[index]);
         }
         xcmd_print("LD%hhu %s\r\n", index + 3, sw ? "ON" : "OFF");
-        led_control(&led_list[led_index[index]], sw);
+        led_reset();
       } else {
         xcmd_print("param error!\r\n");
       }

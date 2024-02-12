@@ -7,6 +7,8 @@ extern void key_scan_init(void);
 extern void key_scan_handle(TASK *task);
 extern void timer_1ms_init(void);
 extern void timer_1ms_handle(TASK *task);
+extern void timer_500ms_init(void);
+extern void timer_500ms_handle(TASK *task);
 extern void main_loop_init(void);
 extern void main_loop_handle(TASK *task);
 
@@ -38,6 +40,13 @@ static TASK s_task_list[] = {
         .delay = 0,
         .init = timer_1ms_init,
         .handle = timer_1ms_handle,
+    },
+    {
+        .id = TASK_ID_TIMER_500MS,
+        .times = -1,
+        .delay = 0,
+        .init = timer_500ms_init,
+        .handle = timer_500ms_handle,
     },
 };
 const static uint32_t s_task_list_size = ARRAY_SIZE(s_task_list);

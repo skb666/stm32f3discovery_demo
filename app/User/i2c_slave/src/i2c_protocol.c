@@ -29,8 +29,6 @@
 
 extern UPDATE_PKG g_update_pkg;
 
-extern void led_all_control(void);
-
 void reg_read_cb_version(void) {
   I2C_PUT_NUM(uint16_t, MCU_SOFTWARE_VERSION);
 }
@@ -53,8 +51,6 @@ void reg_write_cb_led(void) {
 
   I2C_GET_NUM(uint16_t, value);
   leds->value = value;
-
-  led_all_control();
 }
 
 void reg_read_cb_system_ctrl(void) {
