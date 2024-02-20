@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "common.h"
 #include "i2c_slave.h"
 #include "main.h"
 #include "param.h"
@@ -76,7 +77,7 @@ static void system_ctrl_check(void) {
 
   switch (sys->ctrl.system) {
     case SYSTEM_CTRL_REBOOT: {
-      uart_printf(DEV_USART1, "SYSTEM_CTRL_REBOOT\r\n");
+      printf_dbg("SYSTEM_CTRL_REBOOT\r\n");
       LL_mDelay(500);
       NVIC_SystemReset();
     } break;
@@ -91,7 +92,7 @@ static void system_ctrl_check(void) {
         }
       }
 
-      uart_printf(DEV_USART1, "SYSTEM_CTRL_BOOT_APP\r\n");
+      printf_dbg("SYSTEM_CTRL_BOOT_APP\r\n");
       boot_param_check(0);
     } break;
     default: {
